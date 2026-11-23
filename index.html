@@ -1,0 +1,3404 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>工程進度與問題追蹤管理系統 v2.1</title>
+  <style>
+    /* ==================== 1. Design Tokens (Consistent with CAD Canvas v2.1) ==================== */
+    :root {
+      --bg-dark: #0b1120;
+      --bg-panel: #111827;
+      --bg-panel-2: #162033;
+      --bg-card: #151f32;
+      --bg-input: #0b1120;
+      --border: #243249;
+      --border-light: #334155;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-strong: #0284c7;
+      --danger: #ef4444;
+      --warn: #facc15;
+      --orange: #f97316;
+      --success: #22c55e;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    button:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ==================== 2. App Shell & Navigation ==================== */
+    .pm-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .pm-topbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: calc(8px + env(safe-area-inset-top)) 14px 8px 14px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      z-index: 30;
+      flex-wrap: wrap;
+    }
+
+    .pm-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .pm-brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.16);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #7dd3fc;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .pm-project-switcher {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      max-width: 440px;
+      min-width: 210px;
+    }
+
+    .pm-select {
+      flex: 1;
+      min-width: 0;
+      background: var(--bg-input);
+      border: 1px solid var(--border-light);
+      color: #f8fafc;
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .pm-select:focus, .pm-input:focus, .pm-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .pm-top-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #ffffff;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.28);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-warn {
+      background: rgba(249, 115, 22, 0.18);
+      border-color: rgba(249, 115, 22, 0.55);
+      color: #fdba74;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+      font-weight: 500;
+      padding: 7px 11px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #283548;
+      border-color: #475569;
+    }
+
+    .btn-sm {
+      padding: 5px 9px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    /* Main Content Scroll Container */
+    .pm-main {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .pm-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-bottom: 28px;
+    }
+
+    /* Bottom / Tab Navigation */
+    .pm-nav {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 7px 12px calc(7px + env(safe-area-inset-bottom)) 12px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      z-index: 25;
+    }
+
+    .pm-nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 7px 4px;
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .pm-nav-tab.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.45);
+      color: #7dd3fc;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 3px;
+      right: calc(50% - 26px);
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 999px;
+      line-height: 1.2;
+    }
+
+    /* ==================== 3. Cards, Grids & KPI Summary ==================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .kpi-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #f8fafc;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .kpi-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .panel-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--bg-panel-2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .panel-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Status Pills */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-progress {
+      background: rgba(56, 189, 248, 0.16);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #7dd3fc;
+    }
+
+    .badge-issue-open {
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.55);
+      color: #fca5a5;
+    }
+
+    .badge-issue-closed {
+      background: rgba(34, 197, 94, 0.18);
+      border: 1px solid rgba(34, 197, 94, 0.55);
+      color: #86efac;
+    }
+
+    .badge-urgent {
+      background: rgba(249, 115, 22, 0.22);
+      border: 1px solid rgba(249, 115, 22, 0.6);
+      color: #fdba74;
+    }
+
+    .badge-neutral {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+    }
+
+    /* ==================== 4. View 1: Project Overview & CAD Floorplan Library ==================== */
+    .project-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .info-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .info-item-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .info-item-val {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .floorplan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 12px;
+    }
+
+    .fp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s ease;
+    }
+
+    .fp-card:hover {
+      border-color: var(--accent);
+    }
+
+    .fp-thumb-wrap {
+      height: 145px;
+      background: #060b16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .fp-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .fp-floor-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #7dd3fc;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .fp-body {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .fp-title {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: #f8fafc;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fp-meta {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .fp-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    /* ==================== 5. View 2: Calendar & Daily Detail Panel ==================== */
+    .calendar-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 920px) {
+      .calendar-layout {
+        grid-template-columns: 430px 1fr;
+        align-items: start;
+      }
+    }
+
+    .cal-Toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cal-month-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .cal-legend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dot-blue {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #38bdf8;
+      display: inline-block;
+    }
+
+    .dot-red {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      display: inline-block;
+    }
+
+    .dot-green {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      display: inline-block;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-weekday {
+      text-align: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 6px 0;
+    }
+
+    .cal-day {
+      aspect-ratio: 1 / 1;
+      min-height: 46px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.12s ease, background 0.12s ease;
+    }
+
+    .cal-day:hover {
+      border-color: #475569;
+    }
+
+    .cal-day.other-month {
+      opacity: 0.32;
+    }
+
+    .cal-day.today {
+      border-color: rgba(56, 189, 248, 0.65);
+    }
+
+    .cal-day.selected {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .cal-day-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .cal-markers {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-height: 12px;
+    }
+
+    .cal-check {
+      font-size: 10px;
+      color: #4ade80;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    /* Record Cards (Used in Daily Detail & Issue Board) */
+    .record-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .record-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .record-card.issue-open {
+      border-left: 4px solid var(--danger);
+    }
+
+    .record-card.issue-closed {
+      border-left: 4px solid var(--success);
+    }
+
+    .record-card.progress-item {
+      border-left: 4px solid var(--accent);
+    }
+
+    .record-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .record-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .record-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 2px 0;
+    }
+
+    .record-note {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .record-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .record-photos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 240px));
+      gap: 10px;
+    }
+
+    .photo-box {
+      background: #060b16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .photo-box img {
+      display: block;
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+    }
+
+    .photo-box-tag {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.85);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .photo-box-tag.before {
+      border-color: rgba(239, 68, 68, 0.6);
+      color: #fca5a5;
+    }
+
+    .photo-box-tag.after {
+      border-color: rgba(34, 197, 94, 0.6);
+      color: #86efac;
+    }
+
+    /* ==================== 6. Filter Bar ==================== */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+    }
+
+    .pm-input, .pm-textarea {
+      background: var(--bg-input);
+      border: 1px solid var(--border-light);
+      color: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 9px;
+      font-size: 13.5px;
+      outline: none;
+      width: 100%;
+    }
+
+    .pm-textarea {
+      min-height: 74px;
+      resize: vertical;
+    }
+
+    /* ==================== 7. View 4: A4 Report Preview & Print Layout ==================== */
+    .report-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* On-screen A4 White Paper Simulation */
+    .a4-preview-wrapper {
+      background: #060b16;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 12px;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    .a4-paper {
+      width: 210mm;
+      min-height: 297mm;
+      max-width: 100%;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 14mm 15mm;
+      border-radius: 4px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+      font-family: "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+      line-height: 1.45;
+    }
+
+    .rpt-header {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .rpt-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 4px 0;
+    }
+
+    .rpt-subtitle {
+      font-size: 12.5px;
+      color: #475569;
+      margin: 0;
+    }
+
+    .rpt-summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 18px;
+      font-size: 12.5px;
+    }
+
+    .rpt-summary-table th,
+    .rpt-summary-table td {
+      border: 1px solid #cbd5e1;
+      padding: 7px 10px;
+      text-align: left;
+    }
+
+    .rpt-summary-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      width: 16%;
+    }
+
+    .rpt-section-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      background: #e2e8f0;
+      padding: 6px 10px;
+      border-left: 4px solid #0284c7;
+      margin: 18px 0 10px 0;
+    }
+
+    .rpt-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      background: #ffffff;
+    }
+
+    .rpt-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .rpt-tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid #94a3b8;
+    }
+
+    .rpt-tag.open {
+      background: #fef2f2;
+      color: #b91c1c;
+      border-color: #f87171;
+    }
+
+    .rpt-tag.closed {
+      background: #f0fdf4;
+      color: #15803d;
+      border-color: #4ade80;
+    }
+
+    .rpt-tag.prog {
+      background: #f0f9ff;
+      color: #0369a1;
+      border-color: #38bdf8;
+    }
+
+    .rpt-progress-body {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .rpt-issue-photos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .rpt-img-box {
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 4px;
+      text-align: center;
+      background: #f8fafc;
+    }
+
+    .rpt-img-box img {
+      max-width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .rpt-img-cap {
+      font-size: 11px;
+      color: #475569;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .rpt-sign-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 26px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .rpt-sign-box {
+      border: 1px solid #94a3b8;
+      height: 75px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    /* ==================== 8. Modals & Quick Phrases ==================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(2, 6, 23, 0.82);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 620px;
+      max-height: 92dvh;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-panel-2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .modal-body {
+      padding: 14px 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 11px 16px;
+      background: var(--bg-panel-2);
+      border-top: 1px solid var(--border);
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 520px) {
+      .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+      .rpt-progress-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .phrase-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      max-height: 115px;
+      overflow-y: auto;
+      padding: 6px;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .phrase-chip {
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .phrase-chip:hover {
+      border-color: var(--accent);
+      color: #7dd3fc;
+    }
+
+    /* Toast */
+    .pm-toast {
+      position: fixed;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 90;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--accent);
+      color: #f8fafc;
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13.5px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.55);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .pm-toast.show {
+      opacity: 1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-muted);
+      border: 1px dashed var(--border-light);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+    }
+
+    /* ==================== 9. Native A4 Print Media Query (@media print) ==================== */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+
+      html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+
+      .pm-topbar,
+      .pm-nav,
+      .no-print,
+      .modal-backdrop,
+      .pm-toast {
+        display: none !important;
+      }
+
+      .pm-shell,
+      .pm-main,
+      .pm-container {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+      }
+
+      /* Ensure only the report view is shown during printing */
+      .pm-view {
+        display: none !important;
+      }
+
+      #viewReport {
+        display: block !important;
+      }
+
+      .a4-preview-wrapper {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        display: block !important;
+      }
+
+      .a4-paper {
+        width: 100% !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="pm-shell">
+    <!-- ==================== Top Bar ==================== -->
+    <header class="pm-topbar">
+      <div class="pm-brand">
+        <svg class="icon" style="color:var(--accent);width:22px;height:22px;" viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span class="pm-brand-title">工地專案與缺失日曆管理</span>
+        <span class="version-badge">v2.1</span>
+      </div>
+
+      <div class="pm-project-switcher">
+        <select id="projectSelect" class="pm-select" title="切換目前專案"></select>
+        <button id="btnNewProject" class="btn-secondary btn-sm" title="新增專案">＋專案</button>
+        <button id="btnEditProject" class="btn-secondary btn-sm" title="編輯目前專案資訊">編輯</button>
+      </div>
+
+      <div class="pm-top-actions">
+        <button id="btnQuickAddProgress" class="btn-primary btn-sm">＋施工進度</button>
+        <button id="btnQuickAddIssue" class="btn-warn btn-sm">＋問題缺失</button>
+        <a href="index.html" class="btn-secondary btn-sm" style="text-decoration:none;" title="開啟 CAD 疊圖標註畫布">
+          <svg class="icon" style="width:15px;height:15px;" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span>CAD 畫布</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- ==================== Main Scrollable Workspace ==================== -->
+    <main class="pm-main">
+      <div class="pm-container">
+
+        <!-- Global KPI Strip -->
+        <section class="kpi-grid no-print">
+          <div class="kpi-card">
+            <span class="kpi-label">專案狀態 / 預計工期</span>
+            <div class="kpi-value" id="kpiProjectStatus" style="font-size:16px;">進行中</div>
+            <span class="kpi-sub" id="kpiProjectPeriod">--</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">CAD 底圖庫</span>
+            <div class="kpi-value"><span id="kpiFloorplanCount">0</span><span class="kpi-sub">張圖面</span></div>
+            <span class="kpi-sub">預存各樓層平面圖</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">累積施工進度</span>
+            <div class="kpi-value" style="color:#38bdf8;"><span id="kpiProgressCount">0</span><span class="kpi-sub">筆紀錄</span></div>
+            <span class="kpi-sub" id="kpiProgressCompleted">階段完成 0 筆</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">缺失改善結案率</span>
+            <div class="kpi-value" id="kpiIssueRate" style="color:#4ade80;">100%</div>
+            <span class="kpi-sub" id="kpiIssueSummary">待處理 0 / 總計 0</span>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 1: 專案總覽與 CAD 底圖庫 ==================== -->
+        <section id="viewOverview" class="pm-view">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>專案基本資料</span>
+              </h2>
+              <div style="display:flex;gap:6px;">
+                <button id="btnSeedDemoData" class="btn-secondary btn-sm">載入示範工地資料</button>
+                <button id="btnDeleteProject" class="btn-danger btn-sm">刪除專案</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="project-info-grid">
+                <div class="info-item">
+                  <div class="info-item-label">專案名稱</div>
+                  <div class="info-item-val" id="infoProjName">--</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-item-label">業主 / 案場地址</div>
+                  <div class="info-item-val" id="infoProjLocation">--</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-item-label">預計工期</div>
+                  <div class="info-item-val" id="infoProjDates">--</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-item-label">目前狀態</div>
+                  <div class="info-item-val" id="infoProjStatus">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CAD 底圖庫 -->
+          <div class="panel-card" style="margin-top:14px;">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <span>專案專屬 CAD 底圖庫（免重複從相簿找圖）</span>
+              </h2>
+              <div style="display:flex;gap:6px;">
+                <button id="btnAddDemoFloorplan" class="btn-secondary btn-sm">＋產生示範 CAD 底圖</button>
+                <button id="btnUploadFloorplan" class="btn-primary btn-sm">＋匯入樓層 CAD 底圖</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div id="floorplanGrid" class="floorplan-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 2: 日曆檢視與單日詳情 ==================== -->
+        <section id="viewCalendar" class="pm-view hidden">
+          <div class="calendar-layout">
+            <!-- Left: Monthly Calendar -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div class="cal-Toolbar" style="width:100%;">
+                  <button id="btnPrevMonth" class="btn-secondary btn-sm">◀ 上月</button>
+                  <span id="calMonthTitle" class="cal-month-title">2026 年 11 月</span>
+                  <div style="display:flex;gap:4px;">
+                    <button id="btnTodayMonth" class="btn-secondary btn-sm">今日</button>
+                    <button id="btnNextMonth" class="btn-secondary btn-sm">下月 ▶</button>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="cal-legend">
+                  <span class="legend-item"><span class="dot-blue"></span> 施工進度</span>
+                  <span class="legend-item"><span class="dot-red"></span> 待處理缺失</span>
+                  <span class="legend-item"><span class="cal-check">✔</span> 當日缺失全結案</span>
+                </div>
+                <div class="cal-grid" id="calWeekdayHeader">
+                  <div class="cal-weekday">日</div>
+                  <div class="cal-weekday">一</div>
+                  <div class="cal-weekday">二</div>
+                  <div class="cal-weekday">三</div>
+                  <div class="cal-weekday">四</div>
+                  <div class="cal-weekday">五</div>
+                  <div class="cal-weekday">六</div>
+                </div>
+                <div class="cal-grid" id="calDaysGrid"></div>
+              </div>
+            </div>
+
+            <!-- Right: Selected Day Details -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <h2 class="panel-title">
+                  <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span id="selectedDateTitle">2026-11-22 單日施工與問題紀錄</span>
+                </h2>
+                <div style="display:flex;gap:6px;">
+                  <button id="btnDayAddProgress" class="btn-primary btn-sm">＋當日進度</button>
+                  <button id="btnDayAddIssue" class="btn-warn btn-sm">＋當日缺失</button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div id="dailyRecordList" class="record-list"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 3: 跨日期缺失追蹤看板 (Punch List) ==================== -->
+        <section id="viewIssues" class="pm-view hidden">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>跨日期缺失追蹤看板（Punch List / 閉環複驗）</span>
+              </h2>
+              <button id="btnBoardAddIssue" class="btn-warn btn-sm">＋新增缺失紀錄</button>
+            </div>
+            <div class="panel-body">
+              <div class="filter-bar">
+                <label style="display:inline-flex;align-items:center;gap:6px;font-weight:700;color:#fca5a5;cursor:pointer;">
+                  <input type="checkbox" id="filterOnlyOpen" />
+                  <span>僅顯示待處理缺失</span>
+                </label>
+                <select id="filterFloor" class="pm-select" style="max-width:160px;">
+                  <option value="ALL">所有樓層 / 區域</option>
+                </select>
+                <select id="filterTrade" class="pm-select" style="max-width:160px;">
+                  <option value="ALL">所有工種</option>
+                </select>
+                <select id="filterSeverity" class="pm-select" style="max-width:150px;">
+                  <option value="ALL">所有嚴重度</option>
+                  <option value="緊急">緊急</option>
+                  <option value="一般">一般</option>
+                </select>
+                <input type="text" id="filterKeyword" class="pm-input" style="max-width:220px;" placeholder="搜尋編號、工班或備註..." />
+              </div>
+
+              <div id="issueBoardList" class="record-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 4: 多格式報告匯出 (A4 HTML / PDF) & 專案備份 ==================== -->
+        <section id="viewReport" class="pm-view hidden">
+          <!-- Non-printing Controls -->
+          <div class="panel-card no-print" style="margin-bottom:14px;">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>A4 工程報告產出與專案完整備份（含影像檔）</span>
+              </h2>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button id="btnDownloadA4Html" class="btn-primary btn-sm" title="匯出單一可離線開啟與列印的 A4 HTML 報告檔">
+                  📥 下載獨立 A4 HTML 報告檔 (.html)
+                </button>
+                <button id="btnPrintPdf" class="btn-success btn-sm" title="呼叫系統列印並另存為高解析 A4 PDF">
+                  🖨️ 列印 / 另存 A4 PDF 報告
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="report-controls-grid">
+                <div class="form-group">
+                  <label class="form-label">報告起始日期</label>
+                  <input type="date" id="rptStartDate" class="pm-input" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">報告結束日期</label>
+                  <input type="date" id="rptEndDate" class="pm-input" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">包含內容模組</label>
+                  <select id="rptContentScope" class="pm-select">
+                    <option value="both">施工進度 ＋ 問題缺失改善追蹤表</option>
+                    <option value="progress">僅顯示施工進度紀錄</option>
+                    <option value="issues">僅顯示問題／缺失改善追蹤表</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">缺失篩選</label>
+                  <select id="rptIssueFilter" class="pm-select">
+                    <option value="all">全部缺失（含待處理與已結案對照）</option>
+                    <option value="open">僅列出待處理缺失</option>
+                    <option value="closed">僅列出已結案缺失</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Backup & Restore Strip -->
+              <div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <div>
+                  <div style="font-weight:700;font-size:13.5px;color:#f8fafc;">📦 本機專案完整備份與還原（IndexedDB 防線）</div>
+                  <div style="font-size:12px;color:var(--text-muted);">
+                    匯出的 <code>.json</code> 備份檔會將所有「CAD 底圖」與「施工／缺失前、後照片」轉為 Base64 完整封裝，換機或還原後影像 100% 重現。
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#cbd5e1;cursor:pointer;">
+                    <input type="checkbox" id="chkBackupWithImages" checked />
+                    <span>包含所有底圖與照片影像</span>
+                  </label>
+                  <button id="btnExportJsonBackup" class="btn-secondary btn-sm">⬇️ 匯出專案備份 (.json)</button>
+                  <button id="btnImportJsonBackup" class="btn-secondary btn-sm">⬆️ 匯入還原備份 (.json)</button>
+                  <input type="file" id="jsonBackupFileInput" accept=".json,application/json" class="hidden" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- A4 Report Live Paper Preview (Also target for @media print) -->
+          <div class="a4-preview-wrapper">
+            <article id="a4ReportPaper" class="a4-paper"></article>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- ==================== Bottom Navigation Tabs ==================== -->
+    <nav class="pm-nav no-print">
+      <button class="pm-nav-tab active" data-view="viewOverview">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>專案與底圖庫</span>
+      </button>
+      <button class="pm-nav-tab" data-view="viewCalendar">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>日曆檢視</span>
+      </button>
+      <button class="pm-nav-tab" data-view="viewIssues">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>缺失看板</span>
+        <span id="navOpenIssueBadge" class="nav-badge hidden">0</span>
+      </button>
+      <button class="pm-nav-tab" data-view="viewReport">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>A4 報告與備份</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==================== MODAL 1: 新增 / 編輯專案 ==================== -->
+  <div id="projectModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="projectModalTitle" class="modal-title">新增工程專案</h3>
+        <button id="btnCloseProjectModal" class="btn-secondary btn-sm">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">專案名稱 *</label>
+          <input type="text" id="projNameInput" class="pm-input" placeholder="例如：竹北高鐵特區 A 棟室內裝修工程" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">業主 / 案場地址</label>
+          <input type="text" id="projLocationInput" class="pm-input" placeholder="例如：新竹縣竹北市復興三路 168 號" />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">預計開工日</label>
+            <input type="date" id="projStartInput" class="pm-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">預計完工日</label>
+            <input type="date" id="projEndInput" class="pm-input" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">專案狀態</label>
+          <select id="projStatusInput" class="pm-select">
+            <option value="進行中">進行中</option>
+            <option value="驗收改善中">驗收改善中</option>
+            <option value="已完工">已完工</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelProjectModal" class="btn-secondary">取消</button>
+        <button id="btnSaveProjectModal" class="btn-primary">儲存專案</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: 匯入樓層 CAD 底圖 ==================== -->
+  <div id="floorplanModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">匯入專案樓層 CAD 底圖</h3>
+        <button id="btnCloseFpModal" class="btn-secondary btn-sm">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">樓層 / 區域標籤 *</label>
+            <input type="text" id="fpFloorInput" class="pm-input" placeholder="例如：1F、2F、B1、RF" value="1F" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">底圖名稱 *</label>
+            <input type="text" id="fpNameInput" class="pm-input" placeholder="例如：1F 水電配置平面圖" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">選擇 CAD 圖檔（PNG / JPG / WebP，自動壓縮轉存 IndexedDB）</label>
+          <input type="file" id="fpFileInput" accept="image/*" class="pm-input" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelFpModal" class="btn-secondary">取消</button>
+        <button id="btnSaveFpModal" class="btn-primary">存入底圖庫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: 新增 / 編輯「施工進度」或「問題紀錄」 ==================== -->
+  <div id="recordModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="recordModalTitle" class="modal-title">新增工程紀錄</h3>
+        <button id="btnCloseRecordModal" class="btn-secondary btn-sm">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Record Type Switch -->
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">紀錄類型</label>
+            <select id="recTypeSelect" class="pm-select">
+              <option value="progress">🔵 施工進度（Progress）</option>
+              <option value="issue">🔴 問題／缺失紀錄（Issue / Punch List）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">紀錄日期（自動帶入拍攝日或當日）</label>
+            <input type="date" id="recDateInput" class="pm-input" />
+          </div>
+        </div>
+
+        <!-- Shared Fields: Floor / Floorplan & Trade -->
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">綁定樓層 CAD 底圖 / 區域 *</label>
+            <div style="display:flex;gap:6px;">
+              <select id="recFloorplanSelect" class="pm-select"></select>
+              <input type="text" id="recFloorInput" class="pm-input" style="max-width:95px;" placeholder="樓層如 1F" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">工種分類 *</label>
+            <select id="recTradeSelect" class="pm-select">
+              <option value="水電工程">水電工程</option>
+              <option value="木作工程">木作工程</option>
+              <option value="泥作工程">泥作工程</option>
+              <option value="油漆工程">油漆工程</option>
+              <option value="空調工程">空調工程</option>
+              <option value="輕隔間/天花">輕隔間/天花</option>
+              <option value="門窗鐵件">門窗鐵件</option>
+              <option value="弱電消防">弱電消防</option>
+              <option value="其他工種">其他工種</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Progress Specific Fields -->
+        <div id="progressFieldsBox" class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">施作工項摘要 *</label>
+            <input type="text" id="recSummaryInput" class="pm-input" placeholder="例如：天花板骨架與冷媒管路配置" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">進度狀態</label>
+            <select id="recProgressStatusSelect" class="pm-select">
+              <option value="施作中">施作中</option>
+              <option value="階段完成">階段完成</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Issue Specific Fields -->
+        <div id="issueFieldsBox" class="hidden" style="display:flex;flex-direction:column;gap:10px;">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">缺失編號（自動流水號）</label>
+              <input type="text" id="recIssueCodeInput" class="pm-input" placeholder="#001" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">責任工班 / 廠商</label>
+              <input type="text" id="recAssigneeInput" class="pm-input" placeholder="例如：宏達水電工班" />
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">嚴重度</label>
+              <select id="recSeveritySelect" class="pm-select">
+                <option value="一般">一般</option>
+                <option value="緊急">緊急</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">缺失狀態</label>
+              <select id="recIssueStatusSelect" class="pm-select">
+                <option value="待處理">待處理</option>
+                <option value="已結案">已結案</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shared Note + Quick Phrase Panel (Shared with CAD Canvas localStorage) -->
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label class="form-label">現場說明與備註（點擊下方常用詞快速帶入）</label>
+            <button type="button" id="btnClearNote" class="btn-secondary btn-sm" style="padding:2px 7px;font-size:11px;">清除</button>
+          </div>
+          <textarea id="recNoteInput" class="pm-textarea" placeholder="輸入詳細施工部位、缺失原因或改善要求..."></textarea>
+          <div id="recPhraseChips" class="phrase-chips"></div>
+        </div>
+
+        <!-- Image Binding Area -->
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" id="lblBeforePhoto">標註疊圖成果 / 改善前照片 (Before)</label>
+            <input type="file" id="recBeforeFileInput" accept="image/*" class="pm-input" />
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <button type="button" id="btnGenMockBefore" class="btn-secondary btn-sm">⚡ 產生測試標註疊圖</button>
+              <span id="beforePhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">未選擇圖片</span>
+            </div>
+          </div>
+
+          <div class="form-group" id="afterPhotoGroup">
+            <label class="form-label">複驗改善後對照圖 (After，結案時補綁)</label>
+            <input type="file" id="recAfterFileInput" accept="image/*" class="pm-input" />
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <button type="button" id="btnGenMockAfter" class="btn-secondary btn-sm">⚡ 產生測試改善後疊圖</button>
+              <span id="afterPhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">未綁定</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelRecordModal" class="btn-secondary">取消</button>
+        <button id="btnSaveRecordModal" class="btn-primary">寫入專案紀錄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: 大圖檢視器 ==================== -->
+  <div id="lightboxModal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:900px;">
+      <div class="modal-header">
+        <h3 id="lightboxTitle" class="modal-title">影像檢視</h3>
+        <button id="btnCloseLightbox" class="btn-secondary btn-sm">✕</button>
+      </div>
+      <div class="modal-body" style="background:#020617;align-items:center;">
+        <img id="lightboxImg" alt="預覽大圖" style="max-width:100%;max-height:76dvh;object-fit:contain;border-radius:6px;" />
+      </div>
+    </div>
+  </div>
+
+  <div id="pmToast" class="pm-toast"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      /* ==================== 1. Shared Constants & IndexedDB Engine (EngDB) ==================== */
+      const DB_NAME = 'EngineeringProjectDB_v2';
+      const DB_VERSION = 1;
+      const STORAGE_PHRASES_KEY = 'cad_overlay_phrases_v2';
+      const ACTIVE_PROJECT_KEY = 'cad_active_project_id_v2';
+      const CANVAS_BRIDGE_KEY = 'cad_canvas_bridge_context_v2';
+
+      const DEFAULT_PHRASES = [
+        { id: 'p1', text: '1F', category: '樓層' },
+        { id: 'p2', text: '2F', category: '樓層' },
+        { id: 'p3', text: '3F', category: '樓層' },
+        { id: 'p6', text: 'B1', category: '樓層' },
+        { id: 'p8', text: 'LED', category: '設備' },
+        { id: 'p9', text: '軟條燈', category: '設備' },
+        { id: 'p10', text: '嵌燈', category: '設備' },
+        { id: 'p11', text: '配電箱', category: '設備' },
+        { id: 'p12', text: '弱電箱', category: '設備' },
+        { id: 'p13', text: '出風口', category: '設備' },
+        { id: 'p18', text: '已完工', category: '編號狀態' },
+        { id: 'p19', text: '待修繕', category: '編號狀態' },
+        { id: 'p20', text: '待確認', category: '編號狀態' },
+        { id: 'p21', text: '滲漏水', category: '編號狀態' },
+        { id: 'p22', text: '位置偏移', category: '編號狀態' }
+      ];
+
+      class EngDB {
+        constructor() {
+          this.db = null;
+        }
+
+        async open() {
+          if (this.db) return this.db;
+          return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = (e) => {
+              const db = e.target.result;
+              if (!db.objectStoreNames.contains('projects')) {
+                db.createObjectStore('projects', { keyPath: 'id' });
+              }
+              if (!db.objectStoreNames.contains('floorplans')) {
+                const fpStore = db.createObjectStore('floorplans', { keyPath: 'id' });
+                fpStore.createIndex('projectId', 'projectId', { unique: false });
+              }
+              if (!db.objectStoreNames.contains('records')) {
+                const recStore = db.createObjectStore('records', { keyPath: 'id' });
+                recStore.createIndex('projectId', 'projectId', { unique: false });
+                recStore.createIndex('date', 'date', { unique: false });
+              }
+            };
+            req.onsuccess = () => {
+              this.db = req.result;
+              resolve(this.db);
+            };
+            req.onerror = () => reject(req.error);
+          });
+        }
+
+        async tx(storeName, mode, callback) {
+          const db = await this.open();
+          return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, mode);
+            const store = transaction.objectStore(storeName);
+            const request = callback(store);
+            transaction.oncomplete = () => resolve(request?.result);
+            transaction.onerror = () => reject(transaction.error);
+          });
+        }
+
+        async getAll(storeName) {
+          return this.tx(storeName, 'readonly', (store) => store.getAll());
+        }
+
+        async getByIndex(storeName, indexName, value) {
+          const db = await this.open();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(storeName, 'readonly');
+            const idx = tx.objectStore(storeName).index(indexName);
+            const req = idx.getAll(value);
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => reject(req.error);
+          });
+        }
+
+        async put(storeName, item) {
+          return this.tx(storeName, 'readwrite', (store) => store.put(item));
+        }
+
+        async delete(storeName, id) {
+          return this.tx(storeName, 'readwrite', (store) => store.delete(id));
+        }
+      }
+
+      const db = new EngDB();
+
+      /* ==================== 2. Utilities & Image Blob Helpers ==================== */
+      function genId(prefix) {
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      }
+
+      function todayISO() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      let toastTimer = null;
+      function showToast(msg, ms = 2200) {
+        const el = document.getElementById('pmToast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+      }
+
+      // Compress image file to JPEG Blob (0.85 quality, max 1920px) for IndexedDB
+      async function fileToCompressedBlob(file, maxDim = 1920, quality = 0.85) {
+        return new Promise((resolve, reject) => {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            let w = img.naturalWidth || img.width;
+            let h = img.naturalHeight || img.height;
+            if (w > maxDim || h > maxDim) {
+              const ratio = Math.min(maxDim / w, maxDim / h);
+              w = Math.round(w * ratio);
+              h = Math.round(h * ratio);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob((blob) => {
+              resolve({ blob, width: w, height: h });
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = reject;
+          img.src = url;
+        });
+      }
+
+      function blobToDataURL(blob) {
+        if (!blob) return Promise.resolve(null);
+        if (typeof blob === 'string' && blob.startsWith('data:')) return Promise.resolve(blob);
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      async function dataURLToBlob(dataUrl) {
+        if (!dataUrl) return null;
+        const res = await fetch(dataUrl);
+        return await res.blob();
+      }
+
+      // Generate synthetic CAD floorplan or annotated overlay image for offline demo & testing
+      function createSyntheticCadBlob({ title = '1F 平面配置圖', floor = '1F', mode = 'cad', badgeText = '' }) {
+        return new Promise((resolve) => {
+          const w = 1200;
+          const h = 820;
+          const c = document.createElement('canvas');
+          c.width = w;
+          c.height = h;
+          const g = c.getContext('2d');
+
+          g.fillStyle = '#f8fafc';
+          g.fillRect(0, 0, w, h);
+
+          // Grid
+          g.strokeStyle = '#e2e8f0';
+          g.lineWidth = 1;
+          for (let x = 0; x <= w; x += 40) {
+            g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
+          }
+          for (let y = 0; y <= h; y += 40) {
+            g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
+          }
+
+          // Outer & Inner walls
+          g.strokeStyle = '#1e293b';
+          g.lineWidth = 8;
+          g.strokeRect(90, 90, w - 180, h - 180);
+
+          g.lineWidth = 5;
+          g.beginPath();
+          g.moveTo(520, 90); g.lineTo(520, 460);
+          g.moveTo(820, 90); g.lineTo(820, 730);
+          g.moveTo(90, 460); g.lineTo(820, 460);
+          g.stroke();
+
+          // Room Labels
+          g.fillStyle = '#334155';
+          g.font = 'bold 24px "Microsoft JhengHei", sans-serif';
+          g.fillText(`${floor} 主辦公區 / 客廳`, 140, 150);
+          g.fillText(`${floor} 機電茶水間`, 560, 150);
+          g.fillText(`${floor} 走道與設備區`, 140, 520);
+          g.fillText(`${floor} 主管室`, 860, 150);
+
+          // Title Block
+          g.fillStyle = '#0f172a';
+          g.fillRect(90, h - 140, w - 180, 50);
+          g.fillStyle = '#ffffff';
+          g.font = 'bold 20px "Microsoft JhengHei", sans-serif';
+          g.fillText(`圖名：${title} (${floor})`, 115, h - 108);
+
+          // If Progress or Issue overlay mode, draw simulated cropped site photo & red/green callout
+          if (mode !== 'cad') {
+            const isAfter = mode === 'after';
+            const boxColor = isAfter ? '#16a34a' : (mode === 'issue' ? '#dc2626' : '#0284c7');
+
+            // Simulated overlaid site photo card
+            g.fillStyle = '#1e293b';
+            g.fillRect(620, 250, 380, 260);
+            g.strokeStyle = boxColor;
+            g.lineWidth = 6;
+            g.strokeRect(620, 250, 380, 260);
+
+            // Simulated ceiling piping inside photo
+            g.strokeStyle = isAfter ? '#4ade80' : '#facc15';
+            g.lineWidth = 4;
+            g.beginPath();
+            g.moveTo(650, 330); g.lineTo(960, 330);
+            g.moveTo(780, 270); g.lineTo(780, 480);
+            g.stroke();
+
+            g.fillStyle = '#f8fafc';
+            g.font = 'bold 20px "Microsoft JhengHei", sans-serif';
+            g.fillText(isAfter ? '【現場複驗改善完成照片】' : '【現場局部裁切疊圖照片】', 645, 470);
+
+            // Callout circle & arrow to CAD location
+            g.strokeStyle = boxColor;
+            g.lineWidth = 5;
+            g.beginPath();
+            g.arc(380, 310, 48, 0, Math.PI * 2);
+            g.stroke();
+
+            g.beginPath();
+            g.moveTo(620, 360);
+            g.lineTo(428, 315);
+            g.stroke();
+
+            // Tag banner
+            g.fillStyle = boxColor;
+            g.fillRect(140, 210, 420, 44);
+            g.fillStyle = '#ffffff';
+            g.font = 'bold 21px "Microsoft JhengHei", sans-serif';
+            g.fillText(badgeText || (isAfter ? '複驗結果：已改善結案' : '現場標註紀錄'), 155, 239);
+          }
+
+          c.toBlob((blob) => resolve({ blob, width: w, height: h }), 'image/jpeg', 0.85);
+        });
+      }
+
+      /* ==================== 3. Application State ==================== */
+      const state = {
+        activeView: 'viewOverview',
+        projects: [],
+        currentProjectId: null,
+        floorplans: [],
+        records: [],
+        calYear: new Date().getFullYear(),
+        calMonth: new Date().getMonth(), // 0-indexed
+        selectedDate: todayISO(),
+        editingProjectId: null,
+        editingRecordId: null,
+        tempBeforeBlob: null,
+        tempAfterBlob: null,
+        objectUrls: []
+      };
+
+      function revokeAllObjectUrls() {
+        state.objectUrls.forEach((u) => URL.revokeObjectURL(u));
+        state.objectUrls = [];
+      }
+
+      function createManagedObjectUrl(blob) {
+        if (!blob) return '';
+        if (typeof blob === 'string') return blob;
+        const url = URL.createObjectURL(blob);
+        state.objectUrls.push(url);
+        return url;
+      }
+
+      function getCurrentProject() {
+        return state.projects.find((p) => p.id === state.currentProjectId) || null;
+      }
+
+      function loadQuickPhrases() {
+        try {
+          const raw = localStorage.getItem(STORAGE_PHRASES_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          }
+        } catch (_) {}
+        return DEFAULT_PHRASES;
+      }
+
+      /* ==================== 4. Database Loading & Demo Seeding ==================== */
+      async function loadAllProjects(preferredId = null) {
+        state.projects = await db.getAll('projects');
+        state.projects.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        if (state.projects.length === 0) {
+          await seedDemoProject();
+          return;
+        }
+
+        const savedId = preferredId || localStorage.getItem(ACTIVE_PROJECT_KEY);
+        if (savedId && state.projects.some((p) => p.id === savedId)) {
+          state.currentProjectId = savedId;
+        } else {
+          state.currentProjectId = state.projects[0].id;
+        }
+        localStorage.setItem(ACTIVE_PROJECT_KEY, state.currentProjectId);
+
+        await loadProjectData(state.currentProjectId);
+      }
+
+      async function loadProjectData(projectId) {
+        revokeAllObjectUrls();
+        state.floorplans = await db.getByIndex('floorplans', 'projectId', projectId);
+        state.floorplans.sort((a, b) => (a.floor || '').localeCompare(b.floor || ''));
+
+        state.records = await db.getByIndex('records', 'projectId', projectId);
+        state.records.sort((a, b) => {
+          if (a.date !== b.date) return b.date.localeCompare(a.date);
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        });
+
+        renderAll();
+      }
+
+      async function seedDemoProject() {
+        const projId = genId('proj');
+        const today = todayISO();
+        const d1 = today.slice(0, 8) + '05';
+        const d2 = today.slice(0, 8) + '12';
+        const d3 = today.slice(0, 8) + '18';
+
+        const demoProject = {
+          id: projId,
+          name: '竹北高鐵特區 A 棟商業空間裝修工程',
+          location: '新竹縣竹北市復興三路 168 號 1F-2F',
+          startDate: today.slice(0, 8) + '01',
+          endDate: today.slice(0, 8) + '28',
+          status: '進行中',
+          createdAt: Date.now()
+        };
+        await db.put('projects', demoProject);
+
+        const fp1Img = await createSyntheticCadBlob({ title: '1F 建築隔間與水電平面圖', floor: '1F', mode: 'cad' });
+        const fp2Img = await createSyntheticCadBlob({ title: '2F 空調風管與照明配置圖', floor: '2F', mode: 'cad' });
+
+        const fp1 = {
+          id: genId('fp'),
+          projectId: projId,
+          floor: '1F',
+          name: '1F 建築隔間與水電平面圖',
+          imageBlob: fp1Img.blob,
+          width: fp1Img.width,
+          height: fp1Img.height,
+          createdAt: Date.now() - 30000
+        };
+        const fp2 = {
+          id: genId('fp'),
+          projectId: projId,
+          floor: '2F',
+          name: '2F 空調風管與照明配置圖',
+          imageBlob: fp2Img.blob,
+          width: fp2Img.width,
+          height: fp2Img.height,
+          createdAt: Date.now() - 20000
+        };
+        await db.put('floorplans', fp1);
+        await db.put('floorplans', fp2);
+
+        const prog1Blob = await createSyntheticCadBlob({
+          title: fp1.name,
+          floor: '1F',
+          mode: 'progress',
+          badgeText: '1F 配電箱與主幹管線佈設完成'
+        });
+        const prog2Blob = await createSyntheticCadBlob({
+          title: fp2.name,
+          floor: '2F',
+          mode: 'progress',
+          badgeText: '2F 輕鋼架天花與出風口定位'
+        });
+        const issue1Before = await createSyntheticCadBlob({
+          title: fp1.name,
+          floor: '1F',
+          mode: 'issue',
+          badgeText: '缺失 #001：1F 茶水間排水管洩水坡度不足'
+        });
+        const issue1After = await createSyntheticCadBlob({
+          title: fp1.name,
+          floor: '1F',
+          mode: 'after',
+          badgeText: '缺失 #001 複驗：已重新調整吊架坡度並試水合格'
+        });
+        const issue2Before = await createSyntheticCadBlob({
+          title: fp2.name,
+          floor: '2F',
+          mode: 'issue',
+          badgeText: '缺失 #002：2F 會議室線型出風口位置偏移 15cm'
+        });
+
+        const demoRecords = [
+          {
+            id: genId('rec'),
+            projectId: projId,
+            type: 'progress',
+            date: d1,
+            floor: '1F',
+            floorplanId: fp1.id,
+            floorplanName: fp1.name,
+            trade: '水電工程',
+            summary: '1F 主配電箱安裝與 EMT 管路架設',
+            progressStatus: '階段完成',
+            note: '1F 配電箱 弱電箱 迴路標示核對完成，已完工。',
+            beforeBlob: prog1Blob.blob,
+            afterBlob: null,
+            createdAt: Date.now() - 15000
+          },
+          {
+            id: genId('rec'),
+            projectId: projId,
+            type: 'issue',
+            date: d2,
+            floor: '1F',
+            floorplanId: fp1.id,
+            floorplanName: fp1.name,
+            trade: '水電工程',
+            issueCode: '#001',
+            issueStatus: '已結案',
+            severity: '一般',
+            assignee: '宏達水電工班',
+            note: '1F 茶水間排水管坡度平緩恐積水，已請工班重新調整吊筋高度，複驗試水順暢已完工。',
+            beforeBlob: issue1Before.blob,
+            afterBlob: issue1After.blob,
+            resolvedDate: d3,
+            createdAt: Date.now() - 10000
+          },
+          {
+            id: genId('rec'),
+            projectId: projId,
+            type: 'progress',
+            date: today,
+            floor: '2F',
+            floorplanId: fp2.id,
+            floorplanName: fp2.name,
+            trade: '輕隔間/天花',
+            summary: '2F 辦公區暗架天花板骨架與軟條燈槽施作',
+            progressStatus: '施作中',
+            note: '2F LED 軟條燈 嵌燈 開孔位置確認中。',
+            beforeBlob: prog2Blob.blob,
+            afterBlob: null,
+            createdAt: Date.now() - 5000
+          },
+          {
+            id: genId('rec'),
+            projectId: projId,
+            type: 'issue',
+            date: today,
+            floor: '2F',
+            floorplanId: fp2.id,
+            floorplanName: fp2.name,
+            trade: '空調工程',
+            issueCode: '#002',
+            issueStatus: '待處理',
+            severity: '緊急',
+            assignee: '大成空調工程行',
+            note: '2F 出風口 位置偏移，與木作造型天花燈槽衝突，待修繕。',
+            beforeBlob: issue2Before.blob,
+            afterBlob: null,
+            createdAt: Date.now() - 2000
+          }
+        ];
+
+        for (const r of demoRecords) {
+          await db.put('records', r);
+        }
+
+        state.currentProjectId = projId;
+        localStorage.setItem(ACTIVE_PROJECT_KEY, projId);
+        state.projects = await db.getAll('projects');
+        await loadProjectData(projId);
+        showToast('已載入示範專案、CAD 底圖與施工/缺失紀錄');
+      }
+
+      /* ==================== 5. Rendering All Views ==================== */
+      function renderAll() {
+        renderProjectSelectorAndKPI();
+        renderOverviewAndFloorplans();
+        renderCalendarView();
+        renderIssueBoardView();
+        renderReportPreview();
+      }
+
+      function renderProjectSelectorAndKPI() {
+        const sel = document.getElementById('projectSelect');
+        sel.innerHTML = '';
+        state.projects.forEach((p) => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.name} (${p.status || '進行中'})`;
+          if (p.id === state.currentProjectId) opt.selected = true;
+          sel.appendChild(opt);
+        });
+
+        const proj = getCurrentProject();
+        if (!proj) return;
+
+        const progList = state.records.filter((r) => r.type === 'progress');
+        const progDone = progList.filter((r) => r.progressStatus === '階段完成').length;
+        const issueList = state.records.filter((r) => r.type === 'issue');
+        const issueClosed = issueList.filter((r) => r.issueStatus === '已結案').length;
+        const issueOpen = issueList.length - issueClosed;
+        const rate = issueList.length === 0 ? 100 : Math.round((issueClosed / issueList.length) * 100);
+
+        document.getElementById('kpiProjectStatus').textContent = proj.status || '進行中';
+        document.getElementById('kpiProjectPeriod').textContent = `${proj.startDate || '--'} ~ ${proj.endDate || '--'}`;
+        document.getElementById('kpiFloorplanCount').textContent = state.floorplans.length;
+        document.getElementById('kpiProgressCount').textContent = progList.length;
+        document.getElementById('kpiProgressCompleted').textContent = `階段完成 ${progDone} 筆 / 施作中 ${progList.length - progDone} 筆`;
+        document.getElementById('kpiIssueRate').textContent = `${rate}%`;
+        document.getElementById('kpiIssueRate').style.color = issueOpen > 0 ? '#facc15' : '#4ade80';
+        document.getElementById('kpiIssueSummary').textContent = `已結案 ${issueClosed} / 總計 ${issueList.length}（待處理 ${issueOpen}）`;
+
+        const navBadge = document.getElementById('navOpenIssueBadge');
+        if (issueOpen > 0) {
+          navBadge.textContent = issueOpen;
+          navBadge.classList.remove('hidden');
+        } else {
+          navBadge.classList.add('hidden');
+        }
+      }
+
+      function renderOverviewAndFloorplans() {
+        const proj = getCurrentProject();
+        if (!proj) return;
+
+        document.getElementById('infoProjName').textContent = proj.name || '--';
+        document.getElementById('infoProjLocation').textContent = proj.location || '--';
+        document.getElementById('infoProjDates').textContent = `${proj.startDate || '--'} 至 ${proj.endDate || '--'}`;
+        document.getElementById('infoProjStatus').textContent = proj.status || '進行中';
+
+        const grid = document.getElementById('floorplanGrid');
+        grid.innerHTML = '';
+
+        if (state.floorplans.length === 0) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">尚未建立樓層 CAD 底圖。點擊右上角「＋匯入樓層 CAD 底圖」預先存入專案，日後新增紀錄即可一鍵選用。</div>`;
+          return;
+        }
+
+        state.floorplans.forEach((fp) => {
+          const imgUrl = createManagedObjectUrl(fp.imageBlob);
+          const relatedCount = state.records.filter((r) => r.floorplanId === fp.id || r.floor === fp.floor).length;
+          const card = document.createElement('div');
+          card.className = 'fp-card';
+          card.innerHTML = `
+            <div class="fp-thumb-wrap">
+              <img class="fp-thumb" src="${imgUrl}" alt="${fp.name}" />
+              <span class="fp-floor-tag">${fp.floor}</span>
+            </div>
+            <div class="fp-body">
+              <div class="fp-title" title="${fp.name}">${fp.name}</div>
+              <div class="fp-meta">尺寸 ${fp.width || '--'}×${fp.height || '--'} px ｜ 關聯紀錄 ${relatedCount} 筆</div>
+              <div class="fp-actions">
+                <button class="btn-primary btn-sm" style="flex:1;" data-act="use-fp" data-id="${fp.id}">＋新增此樓層紀錄</button>
+                <button class="btn-secondary btn-sm" data-act="open-cad" data-id="${fp.id}" title="載入此底圖至 CAD 畫布">畫布</button>
+                <button class="btn-danger btn-sm" data-act="del-fp" data-id="${fp.id}" title="刪除底圖">✕</button>
+              </div>
+            </div>
+          `;
+          card.querySelector('.fp-thumb').addEventListener('click', () => openLightbox(imgUrl, `${fp.floor} - ${fp.name}`));
+          card.querySelector('[data-act="use-fp"]').addEventListener('click', () => openRecordModal({ floorplanId: fp.id, floor: fp.floor }));
+          card.querySelector('[data-act="open-cad"]').addEventListener('click', () => launchCadCanvasWithContext({ floorplanId: fp.id, floor: fp.floor, floorplanName: fp.name }));
+          card.querySelector('[data-act="del-fp"]').addEventListener('click', async () => {
+            if (!confirm(`確定要刪除底圖「${fp.name}」嗎？`)) return;
+            await db.delete('floorplans', fp.id);
+            await loadProjectData(state.currentProjectId);
+            showToast('已刪除底圖');
+          });
+          grid.appendChild(card);
+        });
+      }
+
+      /* ==================== 6. View 2: Calendar & Daily Detail Panel ==================== */
+      function renderCalendarView() {
+        const y = state.calYear;
+        const m = state.calMonth;
+        document.getElementById('calMonthTitle').textContent = `${y} 年 ${m + 1} 月`;
+
+        const firstDay = new Date(y, m, 1).getDay();
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const prevMonthDays = new Date(y, m, 0).getDate();
+
+        // Group records by YYYY-MM-DD
+        const mapByDate = {};
+        state.records.forEach((r) => {
+          if (!mapByDate[r.date]) mapByDate[r.date] = { progress: 0, issueOpen: 0, issueClosed: 0 };
+          if (r.type === 'progress') mapByDate[r.date].progress++;
+          else if (r.issueStatus === '已結案') mapByDate[r.date].issueClosed++;
+          else mapByDate[r.date].issueOpen++;
+        });
+
+        const grid = document.getElementById('calDaysGrid');
+        grid.innerHTML = '';
+        const todayStr = todayISO();
+
+        const totalCells = 42;
+        for (let i = 0; i < totalCells; i++) {
+          let cellYear = y;
+          let cellMonth = m;
+          let dayNum = 0;
+          let isOther = false;
+
+          if (i < firstDay) {
+            dayNum = prevMonthDays - firstDay + i + 1;
+            cellMonth = m - 1;
+            isOther = true;
+          } else if (i >= firstDay + daysInMonth) {
+            dayNum = i - (firstDay + daysInMonth) + 1;
+            cellMonth = m + 1;
+            isOther = true;
+          } else {
+            dayNum = i - firstDay + 1;
+          }
+
+          const cellDateObj = new Date(cellYear, cellMonth, dayNum);
+          const iso = `${cellDateObj.getFullYear()}-${String(cellDateObj.getMonth() + 1).padStart(2, '0')}-${String(cellDateObj.getDate()).padStart(2, '0')}`;
+          const stat = mapByDate[iso];
+
+          const cell = document.createElement('div');
+          cell.className = 'cal-day';
+          if (isOther) cell.classList.add('other-month');
+          if (iso === todayStr) cell.classList.add('today');
+          if (iso === state.selectedDate) cell.classList.add('selected');
+
+          let markersHtml = '';
+          if (stat) {
+            if (stat.progress > 0) markersHtml += `<span class="dot-blue" title="施工進度 ${stat.progress} 筆"></span>`;
+            if (stat.issueOpen > 0) markersHtml += `<span class="dot-red" title="待處理缺失 ${stat.issueOpen} 筆"></span>`;
+            if (stat.issueOpen === 0 && stat.issueClosed > 0) markersHtml += `<span class="cal-check" title="當日缺失全數結案 (${stat.issueClosed} 筆)">✔</span>`;
+          }
+
+          cell.innerHTML = `
+            <span class="cal-day-num">${dayNum}</span>
+            <div class="cal-markers">${markersHtml}</div>
+          `;
+          cell.addEventListener('click', () => {
+            state.selectedDate = iso;
+            if (isOther) {
+              state.calYear = cellDateObj.getFullYear();
+              state.calMonth = cellDateObj.getMonth();
+            }
+            renderCalendarView();
+          });
+          grid.appendChild(cell);
+        }
+
+        renderDailyRecordsList();
+      }
+
+      function renderDailyRecordsList() {
+        document.getElementById('selectedDateTitle').textContent = `${state.selectedDate} 單日施工進度與問題紀錄`;
+        const listEl = document.getElementById('dailyRecordList');
+        listEl.innerHTML = '';
+
+        const dayRecords = state.records.filter((r) => r.date === state.selectedDate);
+        if (dayRecords.length === 0) {
+          listEl.innerHTML = `<div class="empty-state">此日期（${state.selectedDate}）尚無紀錄。<br/>點擊右上角「＋當日進度」或「＋當日缺失」立即新增。</div>`;
+          return;
+        }
+
+        dayRecords.forEach((rec) => {
+          listEl.appendChild(createRecordCardDOM(rec));
+        });
+      }
+
+      /* ==================== 7. View 3: Cross-Date Issue Tracking Board ==================== */
+      function renderIssueBoardView() {
+        // Populate dynamic floor filter
+        const floorSel = document.getElementById('filterFloor');
+        const currentFloorVal = floorSel.value;
+        const floors = Array.from(new Set([
+          ...state.floorplans.map((f) => f.floor),
+          ...state.records.map((r) => r.floor)
+        ].filter(Boolean)));
+
+        floorSel.innerHTML = `<option value="ALL">所有樓層 / 區域</option>`;
+        floors.forEach((fl) => {
+          const opt = document.createElement('option');
+          opt.value = fl;
+          opt.textContent = fl;
+          if (fl === currentFloorVal) opt.selected = true;
+          floorSel.appendChild(opt);
+        });
+
+        const tradeSel = document.getElementById('filterTrade');
+        const currentTradeVal = tradeSel.value;
+        const trades = Array.from(new Set(state.records.filter((r) => r.type === 'issue').map((r) => r.trade).filter(Boolean)));
+        tradeSel.innerHTML = `<option value="ALL">所有工種</option>`;
+        trades.forEach((tr) => {
+          const opt = document.createElement('option');
+          opt.value = tr;
+          opt.textContent = tr;
+          if (tr === currentTradeVal) opt.selected = true;
+          tradeSel.appendChild(opt);
+        });
+
+        const onlyOpen = document.getElementById('filterOnlyOpen').checked;
+        const floorFilter = floorSel.value;
+        const tradeFilter = tradeSel.value;
+        const sevFilter = document.getElementById('filterSeverity').value;
+        const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
+
+        const issues = state.records.filter((r) => {
+          if (r.type !== 'issue') return false;
+          if (onlyOpen && r.issueStatus === '已結案') return false;
+          if (floorFilter !== 'ALL' && r.floor !== floorFilter) return false;
+          if (tradeFilter !== 'ALL' && r.trade !== tradeFilter) return false;
+          if (sevFilter !== 'ALL' && r.severity !== sevFilter) return false;
+          if (kw) {
+            const hay = `${r.issueCode || ''} ${r.assignee || ''} ${r.note || ''} ${r.floor || ''} ${r.trade || ''}`.toLowerCase();
+            if (!hay.includes(kw)) return false;
+          }
+          return true;
+        });
+
+        const boardEl = document.getElementById('issueBoardList');
+        boardEl.innerHTML = '';
+
+        if (issues.length === 0) {
+          boardEl.innerHTML = `<div class="empty-state">目前篩選條件下沒有符合的缺失紀錄。</div>`;
+          return;
+        }
+
+        issues.forEach((rec) => {
+          boardEl.appendChild(createRecordCardDOM(rec));
+        });
+      }
+
+      /* ==================== 8. Shared Record Card Component ==================== */
+      function createRecordCardDOM(rec) {
+        const isIssue = rec.type === 'issue';
+        const isClosed = isIssue && rec.issueStatus === '已結案';
+        const card = document.createElement('div');
+        card.className = `record-card ${isIssue ? (isClosed ? 'issue-closed' : 'issue-open') : 'progress-item'}`;
+
+        const beforeUrl = createManagedObjectUrl(rec.beforeBlob);
+        const afterUrl = createManagedObjectUrl(rec.afterBlob);
+
+        let badgesHtml = '';
+        if (isIssue) {
+          badgesHtml += `<span class="badge ${isClosed ? 'badge-issue-closed' : 'badge-issue-open'}">${rec.issueCode || '#---'}｜${rec.issueStatus}</span>`;
+          if (rec.severity === '緊急') badgesHtml += `<span class="badge badge-urgent">⚡ 緊急</span>`;
+          else badgesHtml += `<span class="badge badge-neutral">一般</span>`;
+        } else {
+          badgesHtml += `<span class="badge badge-progress">施工進度｜${rec.progressStatus || '施作中'}</span>`;
+        }
+        badgesHtml += `<span class="badge badge-neutral">${rec.floor || '未標樓層'}</span>`;
+        badgesHtml += `<span class="badge badge-neutral">${rec.trade || '未分類工種'}</span>`;
+
+        const titleText = isIssue
+          ? `缺失項目 ${rec.issueCode || ''}（責任工班：${rec.assignee || '未指定'}）`
+          : (rec.summary || '施工進度紀錄');
+
+        let photosHtml = '';
+        if (beforeUrl || afterUrl) {
+          photosHtml = `<div class="record-photos">`;
+          if (beforeUrl) {
+            photosHtml += `
+              <div class="photo-box" data-preview="before">
+                <img src="${beforeUrl}" alt="標註圖" />
+                <span class="photo-box-tag ${isIssue ? 'before' : ''}">${isIssue ? '改善前 (Before)' : 'CAD 標註疊圖'}</span>
+              </div>
+            `;
+          }
+          if (isIssue && afterUrl) {
+            photosHtml += `
+              <div class="photo-box" data-preview="after">
+                <img src="${afterUrl}" alt="改善後照片" />
+                <span class="photo-box-tag after">改善後 (After)</span>
+              </div>
+            `;
+          }
+          photosHtml += `</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="record-top">
+            <div class="record-tags">${badgesHtml}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              ${isIssue && !isClosed ? `<button class="btn-success btn-sm" data-act="verify-close">📸 補綁改善後照片並結案</button>` : ''}
+              ${isIssue ? `<button class="btn-secondary btn-sm" data-act="toggle-status">${isClosed ? '設為待處理' : '✔ 直接勾選結案'}</button>` : ''}
+              <button class="btn-secondary btn-sm" data-act="open-canvas" title="帶入此紀錄底圖開啟 CAD 畫布">進入畫布</button>
+              <button class="btn-secondary btn-sm" data-act="edit">編輯</button>
+              <button class="btn-danger btn-sm" data-act="delete">刪除</button>
+            </div>
+          </div>
+          <div class="record-title">${titleText}</div>
+          <div class="record-note">${rec.note || '（無備註說明）'}</div>
+          ${photosHtml}
+          <div class="record-meta-row">
+            <span>📅 紀錄日期：${rec.date} ${rec.resolvedDate ? `｜ 結案日：${rec.resolvedDate}` : ''}</span>
+            <span>🗺️ 底圖：${rec.floorplanName || '未綁定特定底圖'}</span>
+          </div>
+        `;
+
+        if (beforeUrl) {
+          card.querySelector('[data-preview="before"]')?.addEventListener('click', () => openLightbox(beforeUrl, `${titleText} - 改善前/標註圖`));
+        }
+        if (afterUrl) {
+          card.querySelector('[data-preview="after"]')?.addEventListener('click', () => openLightbox(afterUrl, `${titleText} - 改善後對照圖`));
+        }
+
+        card.querySelector('[data-act="verify-close"]')?.addEventListener('click', () => {
+          openRecordModal({ editRecord: rec, focusAfterPhoto: true });
+        });
+
+        card.querySelector('[data-act="toggle-status"]')?.addEventListener('click', async () => {
+          rec.issueStatus = rec.issueStatus === '已結案' ? '待處理' : '已結案';
+          rec.resolvedDate = rec.issueStatus === '已結案' ? todayISO() : '';
+          await db.put('records', rec);
+          await loadProjectData(state.currentProjectId);
+          showToast(`缺失 ${rec.issueCode} 已更新為「${rec.issueStatus}」`);
+        });
+
+        card.querySelector('[data-act="open-canvas"]')?.addEventListener('click', () => {
+          launchCadCanvasWithContext({
+            recordId: rec.id,
+            floorplanId: rec.floorplanId,
+            floor: rec.floor,
+            floorplanName: rec.floorplanName,
+            type: rec.type
+          });
+        });
+
+        card.querySelector('[data-act="edit"]')?.addEventListener('click', () => {
+          openRecordModal({ editRecord: rec });
+        });
+
+        card.querySelector('[data-act="delete"]')?.addEventListener('click', async () => {
+          if (!confirm(`確定要刪除此筆紀錄「${titleText}」嗎？`)) return;
+          await db.delete('records', rec.id);
+          await loadProjectData(state.currentProjectId);
+          showToast('紀錄已刪除');
+        });
+
+        return card;
+      }
+
+      /* ==================== 9. View 4: A4 Report Preview, Print PDF & Standalone A4 HTML Export ==================== */
+      function initReportDateRange() {
+        const today = todayISO();
+        const firstOfMonth = today.slice(0, 8) + '01';
+        document.getElementById('rptStartDate').value = firstOfMonth;
+        document.getElementById('rptEndDate').value = today;
+      }
+
+      function getFilteredReportData() {
+        const start = document.getElementById('rptStartDate').value || '0000-01-01';
+        const end = document.getElementById('rptEndDate').value || '9999-12-31';
+        const scope = document.getElementById('rptContentScope').value;
+        const issueFilter = document.getElementById('rptIssueFilter').value;
+
+        const inRange = state.records.filter((r) => r.date >= start && r.date <= end);
+
+        const progressList = inRange
+          .filter((r) => r.type === 'progress')
+          .sort((a, b) => a.date.localeCompare(b.date) || (a.floor || '').localeCompare(b.floor || ''));
+
+        const allIssuesInRange = inRange.filter((r) => r.type === 'issue');
+        const filteredIssues = allIssuesInRange
+          .filter((r) => {
+            if (issueFilter === 'open') return r.issueStatus !== '已結案';
+            if (issueFilter === 'closed') return r.issueStatus === '已結案';
+            return true;
+          })
+          .sort((a, b) => (a.issueCode || '').localeCompare(b.issueCode || ''));
+
+        return {
+          start,
+          end,
+          scope,
+          progressList,
+          allIssuesInRange,
+          filteredIssues
+        };
+      }
+
+      function buildReportInnerHtml(proj, data, urlResolver) {
+        const totalIssues = data.allIssuesInRange.length;
+        const closedIssues = data.allIssuesInRange.filter((r) => r.issueStatus === '已結案').length;
+        const rateStr = totalIssues === 0 ? '100% (0/0)' : `${Math.round((closedIssues / totalIssues) * 100)}% (已結案 ${closedIssues} / 總計 ${totalIssues})`;
+
+        let html = `
+          <header class="rpt-header">
+            <div>
+              <h1 class="rpt-title">${proj.name || '工程專案'} — 施工進度與缺失改善追蹤報告</h1>
+              <p class="rpt-subtitle">業主 / 案場地址：${proj.location || '--'} ｜ 專案狀態：${proj.status || '進行中'}</p>
+            </div>
+            <div style="text-align:right;font-size:12px;color:#334155;">
+              <div><strong>報告區間：</strong>${data.start} 至 ${data.end}</div>
+              <div><strong>製表日期：</strong>${todayISO()}</div>
+            </div>
+          </header>
+
+          <table class="rpt-summary-table">
+            <tr>
+              <th>專案名稱</th>
+              <td>${proj.name || '--'}</td>
+              <th>當期總進度筆數</th>
+              <td><strong>${data.progressList.length} 筆</strong></td>
+            </tr>
+            <tr>
+              <th>預計工期</th>
+              <td>${proj.startDate || '--'} ~ ${proj.endDate || '--'}</td>
+              <th>當期缺失結案率</th>
+              <td><strong>${rateStr}</strong></td>
+            </tr>
+          </table>
+        `;
+
+        // Section 1: Construction Progress
+        if (data.scope === 'both' || data.scope === 'progress') {
+          html += `<h2 class="rpt-section-title">壹、施工進度紀錄區（依日期與樓層排序）</h2>`;
+          if (data.progressList.length === 0) {
+            html += `<div class="rpt-card" style="color:#64748b;text-align:center;">所選日期區間內無施工進度紀錄</div>`;
+          } else {
+            data.progressList.forEach((p, idx) => {
+              const imgSrc = urlResolver(p, 'before');
+              html += `
+                <div class="rpt-card">
+                  <div class="rpt-card-head">
+                    <span>#${idx + 1} ｜ 日期：${p.date} ｜ 樓層：${p.floor || '--'} ｜ 工種：${p.trade || '--'}</span>
+                    <span class="rpt-tag prog">${p.progressStatus || '施作中'}</span>
+                  </div>
+                  <div class="rpt-progress-body">
+                    <div>
+                      <div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">施作工項：${p.summary || '--'}</div>
+                      <div style="font-size:12.5px;color:#334155;white-space:pre-wrap;">現場備註：${p.note || '--'}</div>
+                      <div style="font-size:11.5px;color:#64748b;margin-top:6px;">對應底圖：${p.floorplanName || '--'}</div>
+                    </div>
+                    ${imgSrc ? `
+                      <div class="rpt-img-box">
+                        <img src="${imgSrc}" alt="施工進度標註疊圖" />
+                        <div class="rpt-img-cap">CAD 疊圖標註成果</div>
+                      </div>
+                    ` : `<div class="rpt-img-box" style="color:#94a3b8;padding:24px 8px;font-size:12px;">無附圖</div>`}
+                  </div>
+                </div>
+              `;
+            });
+          }
+        }
+
+        // Section 2: Issue / Punch List Tracking
+        if (data.scope === 'both' || data.scope === 'issues') {
+          html += `<h2 class="rpt-section-title">貳、問題／缺失改善追蹤表（改善前 vs. 改善後對照）</h2>`;
+          if (data.filteredIssues.length === 0) {
+            html += `<div class="rpt-card" style="color:#64748b;text-align:center;">所選日期區間與篩選條件內無問題缺失紀錄</div>`;
+          } else {
+            data.filteredIssues.forEach((iss) => {
+              const isClosed = iss.issueStatus === '已結案';
+              const beforeSrc = urlResolver(iss, 'before');
+              const afterSrc = urlResolver(iss, 'after');
+              html += `
+                <div class="rpt-card">
+                  <div class="rpt-card-head">
+                    <span>缺失編號：${iss.issueCode || '#---'} ｜ 樓層：${iss.floor || '--'} ｜ 工種：${iss.trade || '--'} ｜ 責任工班：${iss.assignee || '--'}</span>
+                    <span>
+                      <span class="rpt-tag" style="margin-right:4px;">嚴重度：${iss.severity || '一般'}</span>
+                      <span class="rpt-tag ${isClosed ? 'closed' : 'open'}">${iss.issueStatus}</span>
+                    </span>
+                  </div>
+                  <div style="font-size:12.5px;color:#1e293b;margin-bottom:6px;">
+                    <strong>缺失說明與改善紀錄：</strong>${iss.note || '--'}
+                    <span style="color:#64748b;margin-left:8px;">（開立日：${iss.date}${iss.resolvedDate ? ` ／ 結案日：${iss.resolvedDate}` : ''}）</span>
+                  </div>
+                  <div class="rpt-issue-photos">
+                    <div class="rpt-img-box">
+                      ${beforeSrc ? `<img src="${beforeSrc}" alt="改善前照片" />` : `<div style="padding:36px 0;color:#94a3b8;font-size:12px;">未附改善前照片</div>`}
+                      <div class="rpt-img-cap">【改善前 Before】標註圖</div>
+                    </div>
+                    <div class="rpt-img-box">
+                      ${afterSrc ? `<img src="${afterSrc}" alt="改善後照片" />` : `<div style="padding:36px 0;color:#94a3b8;font-size:12px;">${isClosed ? '已結案（未附對照圖）' : '待工班改善後補拍複驗'}</div>`}
+                      <div class="rpt-img-cap">【改善後 After】複驗對照圖</div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+        }
+
+        html += `
+          <div class="rpt-sign-grid">
+            <div class="rpt-sign-box">工地主任 / 專案負責簽章：</div>
+            <div class="rpt-sign-box">責任工班 / 承攬商簽章：</div>
+            <div class="rpt-sign-box">業主 / 監造複驗簽章：</div>
+          </div>
+        `;
+        return html;
+      }
+
+      function renderReportPreview() {
+        const proj = getCurrentProject();
+        const paper = document.getElementById('a4ReportPaper');
+        if (!proj || !paper) return;
+
+        const data = getFilteredReportData();
+        paper.innerHTML = buildReportInnerHtml(proj, data, (rec, stage) => {
+          const blob = stage === 'after' ? rec.afterBlob : rec.beforeBlob;
+          return createManagedObjectUrl(blob);
+        });
+      }
+
+      // Export Self-Contained Printable A4 HTML File (with embedded Base64 images)
+      async function exportStandaloneA4HtmlFile() {
+        const proj = getCurrentProject();
+        if (!proj) return;
+        showToast('正在封裝 A4 HTML 報告（內嵌高解析圖片）...');
+
+        const data = getFilteredReportData();
+        const base64Map = {};
+
+        for (const rec of [...data.progressList, ...data.filteredIssues]) {
+          if (rec.beforeBlob) {
+            base64Map[`${rec.id}_before`] = await blobToDataURL(rec.beforeBlob);
+          }
+          if (rec.afterBlob) {
+            base64Map[`${rec.id}_after`] = await blobToDataURL(rec.afterBlob);
+          }
+        }
+
+        const reportBodyHtml = buildReportInnerHtml(proj, data, (rec, stage) => {
+          return base64Map[`${rec.id}_${stage}`] || '';
+        });
+
+        const standaloneHtml = `<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${proj.name} - 工程進度與缺失改善報告 (${data.start}~${data.end})</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #e2e8f0;
+      color: #0f172a;
+      font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+      line-height: 1.45;
+    }
+    .toolbar {
+      max-width: 210mm;
+      margin: 0 auto 14px auto;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .print-btn {
+      background: #10b981;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .a4-paper {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 14mm 15mm;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+    }
+    .rpt-header { border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; }
+    .rpt-title { font-size: 20px; font-weight: 800; margin: 0 0 4px 0; }
+    .rpt-subtitle { font-size: 12.5px; color: #475569; margin: 0; }
+    .rpt-summary-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12.5px; }
+    .rpt-summary-table th, .rpt-summary-table td { border: 1px solid #cbd5e1; padding: 7px 10px; text-align: left; }
+    .rpt-summary-table th { background: #f1f5f9; width: 16%; }
+    .rpt-section-title { font-size: 15px; font-weight: 800; background: #e2e8f0; padding: 6px 10px; border-left: 4px solid #0284c7; margin: 18px 0 10px 0; }
+    .rpt-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; page-break-inside: avoid; break-inside: avoid; }
+    .rpt-card-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; font-size: 12.5px; font-weight: 700; }
+    .rpt-tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; border: 1px solid #94a3b8; }
+    .rpt-tag.open { background: #fef2f2; color: #b91c1c; border-color: #f87171; }
+    .rpt-tag.closed { background: #f0fdf4; color: #15803d; border-color: #4ade80; }
+    .rpt-tag.prog { background: #f0f9ff; color: #0369a1; border-color: #38bdf8; }
+    .rpt-progress-body { display: grid; grid-template-columns: 1fr 220px; gap: 12px; align-items: start; }
+    .rpt-issue-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .rpt-img-box { border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; text-align: center; background: #f8fafc; }
+    .rpt-img-box img { max-width: 100%; max-height: 180px; object-fit: contain; display: block; margin: 0 auto; }
+    .rpt-img-cap { font-size: 11px; color: #475569; margin-top: 4px; font-weight: 600; }
+    .rpt-sign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 26px; page-break-inside: avoid; break-inside: avoid; }
+    .rpt-sign-box { border: 1px solid #94a3b8; height: 75px; padding: 6px 10px; font-size: 12px; font-weight: 700; color: #334155; }
+    @media print {
+      @page { size: A4 portrait; margin: 12mm; }
+      body { background: #fff; padding: 0; }
+      .toolbar { display: none !important; }
+      .a4-paper { width: 100%; min-height: 0; padding: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <span>📄 ${proj.name} — A4 離線工程報告（可直接列印或另存 PDF）</span>
+    <button class="print-btn" onclick="window.print()">🖨️ 列印 / 另存 A4 PDF</button>
+  </div>
+  <article class="a4-paper">
+    ${reportBodyHtml}
+  </article>
+</body>
+</html>`;
+
+        const blob = new Blob([standaloneHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${proj.name}_A4工程報告_${data.start}_${data.end}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('已下載獨立可列印 A4 HTML 報告檔');
+      }
+
+      /* ==================== 10. Full Project JSON Backup & Restore (with Base64 Images) ==================== */
+      async function exportProjectJsonBackup() {
+        const proj = getCurrentProject();
+        if (!proj) return;
+        const includeImages = document.getElementById('chkBackupWithImages').checked;
+        showToast(includeImages ? '正在打包專案完整備份（含所有底圖與照片）...' : '正在打包輕量文字備份...');
+
+        const serializedFloorplans = [];
+        for (const fp of state.floorplans) {
+          serializedFloorplans.push({
+            ...fp,
+            imageBlob: undefined,
+            imageDataUrl: includeImages && fp.imageBlob ? await blobToDataURL(fp.imageBlob) : null
+          });
+        }
+
+        const serializedRecords = [];
+        for (const rec of state.records) {
+          serializedRecords.push({
+            ...rec,
+            beforeBlob: undefined,
+            afterBlob: undefined,
+            beforeDataUrl: includeImages && rec.beforeBlob ? await blobToDataURL(rec.beforeBlob) : null,
+            afterDataUrl: includeImages && rec.afterBlob ? await blobToDataURL(rec.afterBlob) : null
+          });
+        }
+
+        const backupPayload = {
+          backupVersion: 'v2.1',
+          exportedAt: new Date().toISOString(),
+          includeImages,
+          project: proj,
+          floorplans: serializedFloorplans,
+          records: serializedRecords,
+          phrases: loadQuickPhrases()
+        };
+
+        const jsonStr = JSON.stringify(backupPayload, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${proj.name}_專案備份_${todayISO()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('專案 .json 備份檔已匯出下載');
+      }
+
+      async function importProjectJsonBackup(file) {
+        try {
+          showToast('正在讀取並還原專案備份檔...');
+          const text = await file.text();
+          const data = JSON.parse(text);
+          if (!data || !data.project || !data.project.id) {
+            alert('無效的專案備份檔格式！');
+            return;
+          }
+
+          await db.put('projects', data.project);
+
+          if (Array.isArray(data.floorplans)) {
+            for (const fp of data.floorplans) {
+              const imageBlob = fp.imageDataUrl ? await dataURLToBlob(fp.imageDataUrl) : null;
+              const cleanFp = { ...fp, imageBlob };
+              delete cleanFp.imageDataUrl;
+              await db.put('floorplans', cleanFp);
+            }
+          }
+
+          if (Array.isArray(data.records)) {
+            for (const rec of data.records) {
+              const beforeBlob = rec.beforeDataUrl ? await dataURLToBlob(rec.beforeDataUrl) : null;
+              const afterBlob = rec.afterDataUrl ? await dataURLToBlob(rec.afterDataUrl) : null;
+              const cleanRec = { ...rec, beforeBlob, afterBlob };
+              delete cleanRec.beforeDataUrl;
+              delete cleanRec.afterDataUrl;
+              await db.put('records', cleanRec);
+            }
+          }
+
+          await loadAllProjects(data.project.id);
+          showToast(`已成功還原專案「${data.project.name}」（含底圖與紀錄影像）`);
+        } catch (err) {
+          console.error(err);
+          alert('匯入備份檔失敗：' + err.message);
+        }
+      }
+
+      /* ==================== 11. Modals & Form Handlers ==================== */
+      function openProjectModal(editMode = false) {
+        const modal = document.getElementById('projectModal');
+        const proj = editMode ? getCurrentProject() : null;
+        state.editingProjectId = proj ? proj.id : null;
+
+        document.getElementById('projectModalTitle').textContent = proj ? '編輯專案基本資料' : '新增工程專案';
+        document.getElementById('projNameInput').value = proj ? proj.name : '';
+        document.getElementById('projLocationInput').value = proj ? (proj.location || '') : '';
+        document.getElementById('projStartInput').value = proj ? (proj.startDate || todayISO()) : todayISO();
+        document.getElementById('projEndInput').value = proj ? (proj.endDate || todayISO()) : todayISO();
+        document.getElementById('projStatusInput').value = proj ? (proj.status || '進行中') : '進行中';
+
+        modal.classList.remove('hidden');
+      }
+
+      function nextIssueSerialCode() {
+        const issueRecords = state.records.filter((r) => r.type === 'issue');
+        let maxNum = 0;
+        issueRecords.forEach((r) => {
+          const m = String(r.issueCode || '').match(/(\d+)/);
+          if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+        });
+        return `#${String(maxNum + 1).padStart(3, '0')}`;
+      }
+
+      function syncRecordModalTypeUI() {
+        const type = document.getElementById('recTypeSelect').value;
+        const progBox = document.getElementById('progressFieldsBox');
+        const issBox = document.getElementById('issueFieldsBox');
+        const afterGroup = document.getElementById('afterPhotoGroup');
+        const lblBefore = document.getElementById('lblBeforePhoto');
+
+        if (type === 'issue') {
+          progBox.classList.add('hidden');
+          issBox.classList.remove('hidden');
+          afterGroup.classList.remove('hidden');
+          lblBefore.textContent = '缺失改善前標註圖 (Before)';
+          if (!document.getElementById('recIssueCodeInput').value) {
+            document.getElementById('recIssueCodeInput').value = nextIssueSerialCode();
+          }
+        } else {
+          progBox.classList.remove('hidden');
+          issBox.classList.add('hidden');
+          afterGroup.classList.add('hidden');
+          lblBefore.textContent = '施工進度 CAD 疊圖成果';
+        }
+      }
+
+      function populateRecordFloorplanSelect(selectedFpId = '', selectedFloor = '') {
+        const sel = document.getElementById('recFloorplanSelect');
+        sel.innerHTML = `<option value="">-- 選擇專案底圖 --</option>`;
+        state.floorplans.forEach((fp) => {
+          const opt = document.createElement('option');
+          opt.value = fp.id;
+          opt.textContent = `[${fp.floor}] ${fp.name}`;
+          if (fp.id === selectedFpId) opt.selected = true;
+          sel.appendChild(opt);
+        });
+
+        const floorInput = document.getElementById('recFloorInput');
+        if (selectedFloor) {
+          floorInput.value = selectedFloor;
+        } else if (selectedFpId) {
+          const fp = state.floorplans.find((f) => f.id === selectedFpId);
+          if (fp) floorInput.value = fp.floor;
+        } else if (state.floorplans[0]) {
+          sel.value = state.floorplans[0].id;
+          floorInput.value = state.floorplans[0].floor;
+        } else {
+          floorInput.value = '1F';
+        }
+      }
+
+      function renderQuickPhrasesInModal() {
+        const wrap = document.getElementById('recPhraseChips');
+        wrap.innerHTML = '';
+        const phrases = loadQuickPhrases();
+        phrases.forEach((p) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'phrase-chip';
+          chip.textContent = p.text;
+          chip.addEventListener('click', () => {
+            const ta = document.getElementById('recNoteInput');
+            const sep = ta.value && !ta.value.endsWith(' ') ? ' ' : '';
+            ta.value = `${ta.value}${sep}${p.text}`;
+            ta.focus();
+          });
+          wrap.appendChild(chip);
+        });
+      }
+
+      function openRecordModal({ type = 'progress', date = '', floorplanId = '', floor = '', editRecord = null, focusAfterPhoto = false } = {}) {
+        state.editingRecordId = editRecord ? editRecord.id : null;
+        state.tempBeforeBlob = editRecord ? editRecord.beforeBlob : null;
+        state.tempAfterBlob = editRecord ? editRecord.afterBlob : null;
+
+        document.getElementById('recordModalTitle').textContent = editRecord
+          ? (focusAfterPhoto ? `閉環複驗：補綁 ${editRecord.issueCode} 改善後照片` : '編輯工程紀錄')
+          : (type === 'issue' ? '新增問題／缺失紀錄' : '新增施工進度紀錄');
+
+        document.getElementById('recTypeSelect').value = editRecord ? editRecord.type : type;
+        document.getElementById('recDateInput').value = editRecord ? editRecord.date : (date || state.selectedDate || todayISO());
+
+        populateRecordFloorplanSelect(
+          editRecord ? editRecord.floorplanId : floorplanId,
+          editRecord ? editRecord.floor : floor
+        );
+
+        document.getElementById('recTradeSelect').value = editRecord ? (editRecord.trade || '水電工程') : '水電工程';
+        document.getElementById('recSummaryInput').value = editRecord ? (editRecord.summary || '') : '';
+        document.getElementById('recProgressStatusSelect').value = editRecord ? (editRecord.progressStatus || '施作中') : '施作中';
+
+        document.getElementById('recIssueCodeInput').value = editRecord ? (editRecord.issueCode || nextIssueSerialCode()) : nextIssueSerialCode();
+        document.getElementById('recAssigneeInput').value = editRecord ? (editRecord.assignee || '') : '';
+        document.getElementById('recSeveritySelect').value = editRecord ? (editRecord.severity || '一般') : '一般';
+        document.getElementById('recIssueStatusSelect').value = focusAfterPhoto
+          ? '已結案'
+          : (editRecord ? (editRecord.issueStatus || '待處理') : '待處理');
+
+        document.getElementById('recNoteInput').value = editRecord ? (editRecord.note || '') : '';
+        document.getElementById('recBeforeFileInput').value = '';
+        document.getElementById('recAfterFileInput').value = '';
+
+        document.getElementById('beforePhotoStateText').textContent = state.tempBeforeBlob ? '✔ 已綁定影像' : '未選擇圖片';
+        document.getElementById('afterPhotoStateText').textContent = state.tempAfterBlob ? '✔ 已綁定改善後影像' : '未綁定';
+
+        renderQuickPhrasesInModal();
+        syncRecordModalTypeUI();
+
+        document.getElementById('recordModal').classList.remove('hidden');
+      }
+
+      function openLightbox(imgUrl, title) {
+        document.getElementById('lightboxTitle').textContent = title || '影像檢視';
+        document.getElementById('lightboxImg').src = imgUrl;
+        document.getElementById('lightboxModal').classList.remove('hidden');
+      }
+
+      // Bridge context saved to localStorage for future seamless integration with index.html CAD Canvas
+      function launchCadCanvasWithContext(ctxPayload) {
+        const bridgeData = {
+          projectId: state.currentProjectId,
+          projectName: getCurrentProject()?.name || '',
+          date: state.selectedDate || todayISO(),
+          ...ctxPayload,
+          timestamp: Date.now()
+        };
+        localStorage.setItem(CANVAS_BRIDGE_KEY, JSON.stringify(bridgeData));
+        window.location.href = 'index.html';
+      }
+
+      /* ==================== 12. Event Listeners Setup ==================== */
+      function bindEvents() {
+        // Bottom Nav View Switching
+        document.querySelectorAll('.pm-nav-tab').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const target = btn.dataset.view;
+            state.activeView = target;
+            document.querySelectorAll('.pm-nav-tab').forEach((b) => b.classList.toggle('active', b === btn));
+            document.querySelectorAll('.pm-view').forEach((sec) => {
+              sec.classList.toggle('hidden', sec.id !== target);
+            });
+            if (target === 'viewReport') renderReportPreview();
+          });
+        });
+
+        // Project Selector
+        document.getElementById('projectSelect').addEventListener('change', async (e) => {
+          state.currentProjectId = e.target.value;
+          localStorage.setItem(ACTIVE_PROJECT_KEY, state.currentProjectId);
+          await loadProjectData(state.currentProjectId);
+          showToast(`已切換至「${getCurrentProject()?.name}」`);
+        });
+
+        document.getElementById('btnNewProject').addEventListener('click', () => openProjectModal(false));
+        document.getElementById('btnEditProject').addEventListener('click', () => openProjectModal(true));
+        document.getElementById('btnCloseProjectModal').addEventListener('click', () => document.getElementById('projectModal').classList.add('hidden'));
+        document.getElementById('btnCancelProjectModal').addEventListener('click', () => document.getElementById('projectModal').classList.add('hidden'));
+
+        document.getElementById('btnSaveProjectModal').addEventListener('click', async () => {
+          const name = document.getElementById('projNameInput').value.trim();
+          if (!name) {
+            alert('請輸入專案名稱');
+            return;
+          }
+          const proj = {
+            id: state.editingProjectId || genId('proj'),
+            name,
+            location: document.getElementById('projLocationInput').value.trim(),
+            startDate: document.getElementById('projStartInput').value,
+            endDate: document.getElementById('projEndInput').value,
+            status: document.getElementById('projStatusInput').value,
+            createdAt: state.editingProjectId ? (getCurrentProject()?.createdAt || Date.now()) : Date.now()
+          };
+          await db.put('projects', proj);
+          document.getElementById('projectModal').classList.add('hidden');
+          await loadAllProjects(proj.id);
+          showToast('專案資料已儲存');
+        });
+
+        document.getElementById('btnDeleteProject').addEventListener('click', async () => {
+          const proj = getCurrentProject();
+          if (!proj) return;
+          if (!confirm(`確定要刪除專案「${proj.name}」及其所有底圖與紀錄嗎？`)) return;
+          for (const fp of state.floorplans) await db.delete('floorplans', fp.id);
+          for (const rec of state.records) await db.delete('records', rec.id);
+          await db.delete('projects', proj.id);
+          await loadAllProjects();
+          showToast('已刪除專案');
+        });
+
+        document.getElementById('btnSeedDemoData').addEventListener('click', async () => {
+          await seedDemoProject();
+        });
+
+        // Floorplan Library Actions
+        document.getElementById('btnUploadFloorplan').addEventListener('click', () => {
+          document.getElementById('fpFloorInput').value = `${state.floorplans.length + 1}F`;
+          document.getElementById('fpNameInput').value = '';
+          document.getElementById('fpFileInput').value = '';
+          document.getElementById('floorplanModal').classList.remove('hidden');
+        });
+        document.getElementById('btnCloseFpModal').addEventListener('click', () => document.getElementById('floorplanModal').classList.add('hidden'));
+        document.getElementById('btnCancelFpModal').addEventListener('click', () => document.getElementById('floorplanModal').classList.add('hidden'));
+
+        document.getElementById('btnSaveFpModal').addEventListener('click', async () => {
+          const floor = document.getElementById('fpFloorInput').value.trim() || '1F';
+          const name = document.getElementById('fpNameInput').value.trim() || `${floor} 平面圖`;
+          const file = document.getElementById('fpFileInput').files[0];
+
+          let imgRes;
+          if (file) {
+            imgRes = await fileToCompressedBlob(file);
+          } else {
+            imgRes = await createSyntheticCadBlob({ title: name, floor, mode: 'cad' });
+          }
+
+          const fp = {
+            id: genId('fp'),
+            projectId: state.currentProjectId,
+            floor,
+            name,
+            imageBlob: imgRes.blob,
+            width: imgRes.width,
+            height: imgRes.height,
+            createdAt: Date.now()
+          };
+          await db.put('floorplans', fp);
+          document.getElementById('floorplanModal').classList.add('hidden');
+          await loadProjectData(state.currentProjectId);
+          showToast(`已存入底圖「${name}」`);
+        });
+
+        document.getElementById('btnAddDemoFloorplan').addEventListener('click', async () => {
+          const floor = `${state.floorplans.length + 1}F`;
+          const name = `${floor} 標準水電空調配置圖`;
+          const imgRes = await createSyntheticCadBlob({ title: name, floor, mode: 'cad' });
+          await db.put('floorplans', {
+            id: genId('fp'),
+            projectId: state.currentProjectId,
+            floor,
+            name,
+            imageBlob: imgRes.blob,
+            width: imgRes.width,
+            height: imgRes.height,
+            createdAt: Date.now()
+          });
+          await loadProjectData(state.currentProjectId);
+          showToast(`已產生示範底圖：${name}`);
+        });
+
+        // Quick Add Buttons
+        document.getElementById('btnQuickAddProgress').addEventListener('click', () => openRecordModal({ type: 'progress' }));
+        document.getElementById('btnQuickAddIssue').addEventListener('click', () => openRecordModal({ type: 'issue' }));
+        document.getElementById('btnDayAddProgress').addEventListener('click', () => openRecordModal({ type: 'progress', date: state.selectedDate }));
+        document.getElementById('btnDayAddIssue').addEventListener('click', () => openRecordModal({ type: 'issue', date: state.selectedDate }));
+        document.getElementById('btnBoardAddIssue').addEventListener('click', () => openRecordModal({ type: 'issue' }));
+
+        // Calendar Navigation
+        document.getElementById('btnPrevMonth').addEventListener('click', () => {
+          state.calMonth--;
+          if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
+          renderCalendarView();
+        });
+        document.getElementById('btnNextMonth').addEventListener('click', () => {
+          state.calMonth++;
+          if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+          renderCalendarView();
+        });
+        document.getElementById('btnTodayMonth').addEventListener('click', () => {
+          const now = new Date();
+          state.calYear = now.getFullYear();
+          state.calMonth = now.getMonth();
+          state.selectedDate = todayISO();
+          renderCalendarView();
+        });
+
+        // Issue Board Filters
+        ['filterOnlyOpen', 'filterFloor', 'filterTrade', 'filterSeverity'].forEach((id) => {
+          document.getElementById(id).addEventListener('change', renderIssueBoardView);
+        });
+        document.getElementById('filterKeyword').addEventListener('input', renderIssueBoardView);
+
+        // Record Modal Events
+        document.getElementById('recTypeSelect').addEventListener('change', syncRecordModalTypeUI);
+        document.getElementById('recFloorplanSelect').addEventListener('change', (e) => {
+          const fp = state.floorplans.find((f) => f.id === e.target.value);
+          if (fp) document.getElementById('recFloorInput').value = fp.floor;
+        });
+        document.getElementById('btnClearNote').addEventListener('click', () => {
+          document.getElementById('recNoteInput').value = '';
+        });
+
+        document.getElementById('recBeforeFileInput').addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const res = await fileToCompressedBlob(file);
+          state.tempBeforeBlob = res.blob;
+          document.getElementById('beforePhotoStateText').textContent = `✔ 已壓縮載入 (${res.width}×${res.height})`;
+        });
+
+        document.getElementById('recAfterFileInput').addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const res = await fileToCompressedBlob(file);
+          state.tempAfterBlob = res.blob;
+          document.getElementById('recIssueStatusSelect').value = '已結案';
+          document.getElementById('afterPhotoStateText').textContent = `✔ 已載入改善後照片（自動轉已結案）`;
+        });
+
+        document.getElementById('btnGenMockBefore').addEventListener('click', async () => {
+          const type = document.getElementById('recTypeSelect').value;
+          const floor = document.getElementById('recFloorInput').value.trim() || '1F';
+          const code = document.getElementById('recIssueCodeInput').value.trim() || '#001';
+          const summary = document.getElementById('recSummaryInput').value.trim() || '現場施作標註';
+          const res = await createSyntheticCadBlob({
+            title: `${floor} 施工標註底圖`,
+            floor,
+            mode: type === 'issue' ? 'issue' : 'progress',
+            badgeText: type === 'issue' ? `缺失 ${code}：改善前標註` : `${floor} ${summary}`
+          });
+          state.tempBeforeBlob = res.blob;
+          document.getElementById('beforePhotoStateText').textContent = '✔ 已產生測試標註疊圖';
+        });
+
+        document.getElementById('btnGenMockAfter').addEventListener('click', async () => {
+          const floor = document.getElementById('recFloorInput').value.trim() || '1F';
+          const code = document.getElementById('recIssueCodeInput').value.trim() || '#001';
+          const res = await createSyntheticCadBlob({
+            title: `${floor} 複驗底圖`,
+            floor,
+            mode: 'after',
+            badgeText: `缺失 ${code} 複驗：已改善結案`
+          });
+          state.tempAfterBlob = res.blob;
+          document.getElementById('recIssueStatusSelect').value = '已結案';
+          document.getElementById('afterPhotoStateText').textContent = '✔ 已產生改善後對照圖（自動轉已結案）';
+        });
+
+        document.getElementById('btnCloseRecordModal').addEventListener('click', () => document.getElementById('recordModal').classList.add('hidden'));
+        document.getElementById('btnCancelRecordModal').addEventListener('click', () => document.getElementById('recordModal').classList.add('hidden'));
+
+        document.getElementById('btnSaveRecordModal').addEventListener('click', async () => {
+          const type = document.getElementById('recTypeSelect').value;
+          const date = document.getElementById('recDateInput').value || todayISO();
+          const fpId = document.getElementById('recFloorplanSelect').value;
+          const fpObj = state.floorplans.find((f) => f.id === fpId);
+          const floor = document.getElementById('recFloorInput').value.trim() || (fpObj ? fpObj.floor : '1F');
+          const trade = document.getElementById('recTradeSelect').value;
+          const note = document.getElementById('recNoteInput').value.trim();
+
+          if (!state.tempBeforeBlob) {
+            const autoImg = await createSyntheticCadBlob({
+              title: fpObj ? fpObj.name : `${floor} 平面圖`,
+              floor,
+              mode: type === 'issue' ? 'issue' : 'progress',
+              badgeText: type === 'issue' ? `缺失 ${document.getElementById('recIssueCodeInput').value}` : (document.getElementById('recSummaryInput').value || '現場標註紀錄')
+            });
+            state.tempBeforeBlob = autoImg.blob;
+          }
+
+          const issueStatus = document.getElementById('recIssueStatusSelect').value;
+          const rec = {
+            id: state.editingRecordId || genId('rec'),
+            projectId: state.currentProjectId,
+            type,
+            date,
+            floor,
+            floorplanId: fpId || '',
+            floorplanName: fpObj ? fpObj.name : `${floor} 平面圖`,
+            trade,
+            note,
+            summary: type === 'progress' ? (document.getElementById('recSummaryInput').value.trim() || `${floor} ${trade}施作`) : '',
+            progressStatus: type === 'progress' ? document.getElementById('recProgressStatusSelect').value : '',
+            issueCode: type === 'issue' ? (document.getElementById('recIssueCodeInput').value.trim() || nextIssueSerialCode()) : '',
+            assignee: type === 'issue' ? document.getElementById('recAssigneeInput').value.trim() : '',
+            severity: type === 'issue' ? document.getElementById('recSeveritySelect').value : '',
+            issueStatus: type === 'issue' ? issueStatus : '',
+            resolvedDate: type === 'issue' && issueStatus === '已結案' ? todayISO() : '',
+            beforeBlob: state.tempBeforeBlob,
+            afterBlob: type === 'issue' ? state.tempAfterBlob : null,
+            createdAt: Date.now()
+          };
+
+          await db.put('records', rec);
+          state.selectedDate = date;
+          document.getElementById('recordModal').classList.add('hidden');
+          await loadProjectData(state.currentProjectId);
+          showToast(type === 'issue' ? `已儲存缺失紀錄 ${rec.issueCode}` : '已儲存施工進度紀錄');
+        });
+
+        // Lightbox
+        document.getElementById('btnCloseLightbox').addEventListener('click', () => document.getElementById('lightboxModal').classList.add('hidden'));
+        document.getElementById('lightboxModal').addEventListener('click', (e) => {
+          if (e.target.id === 'lightboxModal') document.getElementById('lightboxModal').classList.add('hidden');
+        });
+
+        // Report Filters & Exports
+        ['rptStartDate', 'rptEndDate', 'rptContentScope', 'rptIssueFilter'].forEach((id) => {
+          document.getElementById(id).addEventListener('change', renderReportPreview);
+        });
+
+        document.getElementById('btnPrintPdf').addEventListener('click', () => {
+          renderReportPreview();
+          window.print();
+        });
+
+        document.getElementById('btnDownloadA4Html').addEventListener('click', exportStandaloneA4HtmlFile);
+
+        // JSON Backup & Restore
+        document.getElementById('btnExportJsonBackup').addEventListener('click', exportProjectJsonBackup);
+        document.getElementById('btnImportJsonBackup').addEventListener('click', () => {
+          document.getElementById('jsonBackupFileInput').value = '';
+          document.getElementById('jsonBackupFileInput').click();
+        });
+        document.getElementById('jsonBackupFileInput').addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) importProjectJsonBackup(file);
+        });
+      }
+
+      /* ==================== 13. Bootstrap ==================== */
+      async function init() {
+        initReportDateRange();
+        bindEvents();
+        await loadAllProjects();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
