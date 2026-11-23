@@ -1137,6 +1137,419 @@
       font-size: 13px;
     }
 
+    .lbl-short {
+      display: none;
+    }
+
+    /* Floating Expand UI Button (Visible when UI is collapsed) */
+    .expand-ui-btn {
+      position: fixed;
+      top: calc(8px + env(safe-area-inset-top));
+      right: calc(10px + env(safe-area-inset-right));
+      z-index: 55;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      color: #f8fafc;
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+      display: none;
+    }
+
+    body.ui-collapsed .expand-ui-btn {
+      display: inline-flex;
+    }
+
+    body.ui-collapsed .pm-topbar,
+    body.ui-collapsed .pm-nav,
+    body.ui-collapsed #kpiGridSection {
+      display: none !important;
+    }
+
+    body.ui-collapsed .pm-shell {
+      display: flex !important;
+    }
+
+    /* ==================== 8.5 JS-Driven Landscape Proportional Compact Layout ==================== */
+    body.is-landscape {
+      font-size: 12.5px;
+    }
+
+    body.is-landscape .hide-land {
+      display: none !important;
+    }
+
+    body.is-landscape .lbl-full {
+      display: none;
+    }
+
+    body.is-landscape .lbl-short {
+      display: inline;
+    }
+
+    /* 2-Row × 2-Column Grid in Landscape: Topbar (Row 1) + Left Vertical Nav & Center Main (Row 2) */
+    body.is-landscape .pm-shell {
+      display: grid;
+      grid-template-columns: calc(60px + env(safe-area-inset-left)) minmax(0, 1fr);
+      grid-template-rows: 38px minmax(0, 1fr);
+    }
+
+    /* Ultra-Slim Topbar (38px) */
+    body.is-landscape .pm-topbar {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      height: 38px;
+      padding: 2px calc(10px + env(safe-area-inset-right)) 2px calc(10px + env(safe-area-inset-left));
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    body.is-landscape .pm-brand-title {
+      font-size: 13px;
+    }
+
+    body.is-landscape .version-badge {
+      padding: 1px 6px;
+      font-size: 10px;
+    }
+
+    body.is-landscape .pm-project-switcher {
+      max-width: 340px;
+      min-width: 150px;
+      gap: 4px;
+    }
+
+    body.is-landscape .pm-topbar .pm-select {
+      padding: 3px 8px;
+      font-size: 12px;
+      height: 28px;
+      border-radius: 7px;
+    }
+
+    body.is-landscape .pm-topbar .btn-sm,
+    body.is-landscape .pm-topbar .btn-primary,
+    body.is-landscape .pm-topbar .btn-warn,
+    body.is-landscape .pm-topbar .btn-secondary {
+      padding: 3px 8px;
+      font-size: 11.5px;
+      height: 28px;
+      border-radius: 7px;
+    }
+
+    body.is-landscape .pm-topbar .icon {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Left Vertical Sidebar Navigation (60px wide) — frees 100% bottom vertical height */
+    body.is-landscape .pm-nav {
+      grid-column: 1;
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 5px;
+      width: calc(60px + env(safe-area-inset-left));
+      padding: 6px 5px 6px calc(5px + env(safe-area-inset-left));
+      background: var(--bg-dark);
+      border-right: 1px solid var(--border);
+      border-top: none;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    body.is-landscape .pm-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    body.is-landscape .pm-nav-tab {
+      flex: 1;
+      min-height: 46px;
+      max-height: 68px;
+      padding: 5px 2px;
+      font-size: 10px;
+      gap: 3px;
+      border-radius: 8px;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    body.is-landscape .pm-nav-tab .icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    body.is-landscape .nav-badge {
+      top: 2px;
+      right: 4px;
+      font-size: 9px;
+      padding: 1px 4px;
+    }
+
+    /* Center Main Workspace Maximized */
+    body.is-landscape .pm-main {
+      grid-column: 2;
+      grid-row: 2;
+      padding: 8px 10px;
+      gap: 8px;
+    }
+
+    body.is-landscape .pm-container {
+      gap: 8px;
+      padding-bottom: 14px;
+    }
+
+    /* KPI Grid: Ultra-compact single-row strip in Overview, auto-hidden in Calendar/Issues/Report to prioritize central content */
+    body.is-landscape.view-non-overview #kpiGridSection {
+      display: none !important;
+    }
+
+    body.is-landscape .kpi-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    body.is-landscape .kpi-card {
+      padding: 6px 10px;
+      border-radius: 8px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    body.is-landscape .kpi-label {
+      font-size: 11px;
+    }
+
+    body.is-landscape .kpi-value {
+      font-size: 14.5px !important;
+    }
+
+    body.is-landscape .kpi-sub {
+      font-size: 10.5px;
+      width: 100%;
+    }
+
+    /* Proportional Downscaling of Panels, Headers, Cards & Inputs */
+    body.is-landscape .panel-card {
+      border-radius: 10px;
+    }
+
+    body.is-landscape .panel-header {
+      padding: 7px 11px;
+      gap: 6px;
+    }
+
+    body.is-landscape .panel-title {
+      font-size: 13px;
+      gap: 5px;
+    }
+
+    body.is-landscape .panel-title .icon {
+      width: 15px;
+      height: 15px;
+    }
+
+    body.is-landscape .panel-body {
+      padding: 9px 11px;
+      gap: 8px;
+    }
+
+    body.is-landscape .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+
+    body.is-landscape .badge {
+      padding: 1px 6px;
+      font-size: 10.5px;
+    }
+
+    /* View 1: Overview & Floorplans Compact */
+    body.is-landscape .project-info-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    body.is-landscape .info-item {
+      padding: 6px 9px;
+    }
+
+    body.is-landscape .info-item-label {
+      font-size: 10.5px;
+    }
+
+    body.is-landscape .info-item-val {
+      font-size: 12.5px;
+    }
+
+    body.is-landscape .floorplan-grid {
+      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+      gap: 8px;
+    }
+
+    body.is-landscape .fp-thumb-wrap {
+      height: 96px;
+    }
+
+    body.is-landscape .fp-body {
+      padding: 7px 9px;
+      gap: 5px;
+    }
+
+    body.is-landscape .fp-title {
+      font-size: 12px;
+    }
+
+    body.is-landscape .fp-meta {
+      font-size: 10.5px;
+    }
+
+    /* View 2: Side-by-Side Calendar & Daily Detail on All Landscape Screens */
+    body.is-landscape .calendar-layout {
+      grid-template-columns: 275px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+
+    body.is-landscape .cal-month-title {
+      font-size: 13.5px;
+    }
+
+    body.is-landscape .cal-legend {
+      font-size: 10.5px;
+      gap: 8px;
+    }
+
+    body.is-landscape .cal-weekday {
+      font-size: 10.5px;
+      padding: 2px 0;
+    }
+
+    body.is-landscape .cal-grid {
+      gap: 3px;
+    }
+
+    body.is-landscape .cal-day {
+      aspect-ratio: auto;
+      min-height: 31px;
+      height: 32px;
+      padding: 2px 3px;
+      border-radius: 6px;
+    }
+
+    body.is-landscape .cal-day-num {
+      font-size: 11.5px;
+      line-height: 1.1;
+    }
+
+    body.is-landscape .cal-markers {
+      min-height: 8px;
+      gap: 2px;
+    }
+
+    body.is-landscape .dot-blue,
+    body.is-landscape .dot-red,
+    body.is-landscape .dot-green {
+      width: 6px;
+      height: 6px;
+    }
+
+    /* Compact Record Cards in Daily List & Issue Board */
+    body.is-landscape .record-list {
+      gap: 7px;
+    }
+
+    body.is-landscape .record-card {
+      padding: 8px 10px;
+      gap: 6px;
+      border-radius: 9px;
+    }
+
+    body.is-landscape .record-title {
+      font-size: 13px;
+      margin: 0;
+    }
+
+    body.is-landscape .record-note {
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    body.is-landscape .record-photos {
+      grid-template-columns: repeat(auto-fit, minmax(135px, 185px));
+      gap: 8px;
+    }
+
+    body.is-landscape .photo-box img {
+      height: 102px;
+    }
+
+    body.is-landscape .record-meta-row {
+      font-size: 11px;
+      padding-top: 4px;
+    }
+
+    /* View 3: Filter Bar Compact */
+    body.is-landscape .filter-bar {
+      padding: 6px 9px;
+      gap: 6px;
+    }
+
+    body.is-landscape .filter-bar .pm-select,
+    body.is-landscape .filter-bar .pm-input {
+      padding: 4px 8px;
+      font-size: 12px;
+      height: 28px;
+    }
+
+    /* Modals in Landscape: wider & more compact to avoid excessive scrolling */
+    body.is-landscape .modal-card {
+      max-width: 680px;
+      max-height: 94dvh;
+    }
+
+    body.is-landscape .modal-header {
+      padding: 8px 14px;
+    }
+
+    body.is-landscape .modal-title {
+      font-size: 13.5px;
+    }
+
+    body.is-landscape .modal-body {
+      padding: 10px 14px;
+      gap: 8px;
+    }
+
+    body.is-landscape .modal-footer {
+      padding: 7px 14px;
+    }
+
+    body.is-landscape .pm-input,
+    body.is-landscape .pm-select {
+      padding: 5px 8px;
+      font-size: 12.5px;
+    }
+
+    body.is-landscape .pm-textarea {
+      min-height: 52px;
+      padding: 5px 8px;
+      font-size: 12.5px;
+    }
+
+    body.is-landscape .phrase-chips {
+      max-height: 76px;
+      padding: 4px;
+    }
+
     /* ==================== 9. Native A4 Print Media Query (@media print) ==================== */
     @media print {
       @page {
@@ -1216,21 +1629,38 @@
       </div>
 
       <div class="pm-top-actions">
-        <button id="btnQuickAddProgress" class="btn-primary btn-sm">＋施工進度</button>
-        <button id="btnQuickAddIssue" class="btn-warn btn-sm">＋問題缺失</button>
-        <a href="index.html" class="btn-secondary btn-sm" style="text-decoration:none;" title="開啟 CAD 疊圖標註畫布">
+        <button id="btnQuickAddProgress" class="btn-primary btn-sm">
+          <span class="lbl-full">＋施工進度</span>
+          <span class="lbl-short">＋進度</span>
+        </button>
+        <button id="btnQuickAddIssue" class="btn-warn btn-sm">
+          <span class="lbl-full">＋問題缺失</span>
+          <span class="lbl-short">＋缺失</span>
+        </button>
+        <button id="btnCollapseUi" class="btn-secondary btn-sm" title="收合導覽列以全畫面檢視中央資訊">
+          <svg class="icon" style="width:15px;height:15px;" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          <span class="hide-land">收合</span>
+        </button>
+        <a href="../CAD 疊圖與局部裁切標註畫布 html/index.html" class="btn-secondary btn-sm" style="text-decoration:none;" title="開啟 CAD 疊圖標註畫布">
           <svg class="icon" style="width:15px;height:15px;" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-          <span>CAD 畫布</span>
+          <span class="lbl-full">CAD 畫布</span>
+          <span class="lbl-short">畫布</span>
         </a>
       </div>
     </header>
+
+    <!-- Floating Expand Button when UI is Collapsed -->
+    <button id="btnExpandUi" class="expand-ui-btn no-print">
+      <svg class="icon" style="width:15px;height:15px;" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      <span>展開導覽</span>
+    </button>
 
     <!-- ==================== Main Scrollable Workspace ==================== -->
     <main class="pm-main">
       <div class="pm-container">
 
         <!-- Global KPI Strip -->
-        <section class="kpi-grid no-print">
+        <section id="kpiGridSection" class="kpi-grid no-print">
           <div class="kpi-card">
             <span class="kpi-label">專案狀態 / 預計工期</span>
             <div class="kpi-value" id="kpiProjectStatus" style="font-size:16px;">進行中</div>
@@ -1474,11 +1904,13 @@
     <nav class="pm-nav no-print">
       <button class="pm-nav-tab active" data-view="viewOverview">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>專案與底圖庫</span>
+        <span class="lbl-full">專案與底圖庫</span>
+        <span class="lbl-short">專案底圖</span>
       </button>
       <button class="pm-nav-tab" data-view="viewCalendar">
         <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>日曆檢視</span>
+        <span class="lbl-full">日曆檢視</span>
+        <span class="lbl-short">日曆</span>
       </button>
       <button class="pm-nav-tab" data-view="viewIssues">
         <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -1487,7 +1919,8 @@
       </button>
       <button class="pm-nav-tab" data-view="viewReport">
         <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span>A4 報告與備份</span>
+        <span class="lbl-full">A4 報告與備份</span>
+        <span class="lbl-short">A4報告</span>
       </button>
     </nav>
   </div>
@@ -3097,16 +3530,58 @@
           timestamp: Date.now()
         };
         localStorage.setItem(CANVAS_BRIDGE_KEY, JSON.stringify(bridgeData));
-        window.location.href = 'index.html';
+        window.location.href = '../CAD 疊圖與局部裁切標註畫布 html/index.html';
+      }
+
+      /* ==================== 11.5 JS-Driven Landscape Orientation Sync ==================== */
+      let orientationTimers = [];
+
+      function syncOrientationLayout() {
+        const vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth;
+        const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+        const isLandscape = vw > vh;
+        const prevLandscape = document.body.classList.contains('is-landscape');
+
+        if (isLandscape !== prevLandscape) {
+          document.body.classList.toggle('is-landscape', isLandscape);
+          const shell = document.querySelector('.pm-shell');
+          if (shell) void shell.offsetHeight;
+        }
+      }
+
+      function scheduleOrientationSync() {
+        orientationTimers.forEach((t) => clearTimeout(t));
+        orientationTimers = [];
+        syncOrientationLayout();
+        orientationTimers.push(setTimeout(syncOrientationLayout, 150));
+        orientationTimers.push(setTimeout(syncOrientationLayout, 350));
       }
 
       /* ==================== 12. Event Listeners Setup ==================== */
       function bindEvents() {
-        // Bottom Nav View Switching
+        // Orientation & UI Collapse Listeners
+        window.addEventListener('resize', scheduleOrientationSync);
+        window.addEventListener('orientationchange', scheduleOrientationSync);
+        if (window.screen && window.screen.orientation && window.screen.orientation.addEventListener) {
+          window.screen.orientation.addEventListener('change', scheduleOrientationSync);
+        }
+        if (window.visualViewport && window.visualViewport.addEventListener) {
+          window.visualViewport.addEventListener('resize', scheduleOrientationSync);
+        }
+
+        document.getElementById('btnCollapseUi').addEventListener('click', () => {
+          document.body.classList.add('ui-collapsed');
+        });
+        document.getElementById('btnExpandUi').addEventListener('click', () => {
+          document.body.classList.remove('ui-collapsed');
+        });
+
+        // Bottom / Left Nav View Switching
         document.querySelectorAll('.pm-nav-tab').forEach((btn) => {
           btn.addEventListener('click', () => {
             const target = btn.dataset.view;
             state.activeView = target;
+            document.body.classList.toggle('view-non-overview', target !== 'viewOverview');
             document.querySelectorAll('.pm-nav-tab').forEach((b) => b.classList.toggle('active', b === btn));
             document.querySelectorAll('.pm-view').forEach((sec) => {
               sec.classList.toggle('hidden', sec.id !== target);
@@ -3392,11 +3867,13 @@
 
       /* ==================== 13. Bootstrap ==================== */
       async function init() {
+        syncOrientationLayout();
         initReportDateRange();
         bindEvents();
         await loadAllProjects();
       }
 
+      document.addEventListener('DOMContentLoaded', syncOrientationLayout);
       init();
     })();
   </script>
