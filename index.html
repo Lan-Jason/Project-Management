@@ -450,17 +450,18 @@
 
     .floorplan-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 12px;
+      align-items: start;
     }
 
     .fp-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      overflow: hidden;
       display: flex;
       flex-direction: column;
+      height: auto;
       transition: border-color 0.15s ease;
     }
 
@@ -476,6 +477,7 @@
       justify-content: center;
       position: relative;
       overflow: hidden;
+      border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
       border-bottom: 1px solid var(--border);
     }
 
@@ -503,27 +505,136 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      flex: 1;
     }
 
     .fp-title {
       font-weight: 700;
       font-size: 13.5px;
       color: #f8fafc;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      line-height: 1.35;
+      word-break: break-word;
     }
 
     .fp-meta {
       font-size: 11.5px;
       color: var(--text-muted);
+      line-height: 1.35;
+      word-break: break-word;
     }
 
     .fp-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 6px;
-      margin-top: auto;
+      margin-top: 2px;
+      width: 100%;
+    }
+
+    .fp-actions > button {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    /* Multi-image Thumbnail Strip inside Floorplan Card & Modals */
+    .fp-count-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #f8fafc;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .fp-mini-strip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow-x: auto;
+      padding: 3px 0;
+    }
+
+    .fp-mini-item {
+      width: 38px;
+      height: 30px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border-light);
+      overflow: hidden;
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+      background: #060b16;
+    }
+
+    .fp-mini-item.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .fp-mini-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Editable Multi-Photo Thumbnail Grid inside Record Modal */
+    .modal-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+      gap: 6px;
+      margin-top: 6px;
+      max-height: 165px;
+      overflow-y: auto;
+      padding: 4px;
+      background: #060b16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .modal-photo-item {
+      position: relative;
+      height: 64px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      background: #0f172a;
+    }
+
+    .modal-photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .modal-photo-del {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.9);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Multi-photo grid in A4 Report */
+    .rpt-multi-photos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
     }
 
     /* ==================== 5. View 2: Calendar & Daily Detail Panel ==================== */
@@ -1395,17 +1506,24 @@
     }
 
     body.is-landscape .floorplan-grid {
-      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    body.is-landscape .fp-card {
+      height: auto;
+      overflow: visible;
     }
 
     body.is-landscape .fp-thumb-wrap {
-      height: 96px;
+      height: 100px;
     }
 
     body.is-landscape .fp-body {
-      padding: 7px 9px;
-      gap: 5px;
+      padding: 8px 10px;
+      gap: 6px;
+      overflow: visible;
     }
 
     body.is-landscape .fp-title {
@@ -1414,6 +1532,19 @@
 
     body.is-landscape .fp-meta {
       font-size: 10.5px;
+    }
+
+    body.is-landscape .fp-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      overflow: visible;
+    }
+
+    body.is-landscape .fp-actions > button {
+      min-height: 27px;
+      padding: 4px 7px;
+      font-size: 11px;
     }
 
     /* View 2: Side-by-Side Calendar & Daily Detail on All Landscape Screens */
@@ -1874,12 +2005,31 @@
                 </div>
               </div>
 
+              <!-- Structured Folder Export Strip (Desktop Directory Picker vs. Mobile/Universal ZIP Package) -->
+              <div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <div>
+                  <div style="font-weight:700;font-size:13.5px;color:#38bdf8;">📁 專案結構化資料夾匯出（依「專案名稱 / 底圖 / 進度 / 缺失」自動分資料夾）</div>
+                  <div style="font-size:12px;color:var(--text-muted);">
+                    • <strong>電腦版（Chrome / Edge）</strong>：可直接選取硬碟目錄，自動建立專案名稱資料夾與分類子資料夾並寫入所有照片與報告。<br/>
+                    • <strong>行動裝置（iOS / Android）與跨平台</strong>：一鍵打包為相同資料夾結構之 <code>.zip</code> 歸檔包（支援系統原生分享至檔案 / Google Drive / LINE）。
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <button id="btnExportDesktopFolder" class="btn-primary btn-sm" title="電腦版直接選擇本機資料夾建立專案目錄樹">
+                    💻 電腦：直接建立本機專案資料夾
+                  </button>
+                  <button id="btnExportMobileZip" class="btn-success btn-sm" title="行動裝置或跨平台匯出完整結構化資料夾 .zip 壓縮包">
+                    📱 手機 / 通用：匯出結構化資料夾 (.zip)
+                  </button>
+                </div>
+              </div>
+
               <!-- Backup & Restore Strip -->
               <div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
                 <div>
-                  <div style="font-weight:700;font-size:13.5px;color:#f8fafc;">📦 本機專案完整備份與還原（IndexedDB 防線）</div>
+                  <div style="font-weight:700;font-size:13.5px;color:#f8fafc;">📦 本機系統單檔備份與還原（IndexedDB 防線 .json）</div>
                   <div style="font-size:12px;color:var(--text-muted);">
-                    匯出的 <code>.json</code> 備份檔會將所有「CAD 底圖」與「施工／缺失前、後照片」轉為 Base64 完整封裝，換機或還原後影像 100% 重現。
+                    匯出的 <code>.json</code> 備份檔會將所有「CAD 底圖」與「施工／缺失多張照片」轉為 Base64 完整封裝，換機或還原後影像 100% 重現。
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1887,7 +2037,7 @@
                     <input type="checkbox" id="chkBackupWithImages" checked />
                     <span>包含所有底圖與照片影像</span>
                   </label>
-                  <button id="btnExportJsonBackup" class="btn-secondary btn-sm">⬇️ 匯出專案備份 (.json)</button>
+                  <button id="btnExportJsonBackup" class="btn-secondary btn-sm">⬇️ 匯出系統備份 (.json)</button>
                   <button id="btnImportJsonBackup" class="btn-secondary btn-sm">⬆️ 匯入還原備份 (.json)</button>
                   <input type="file" id="jsonBackupFileInput" accept=".json,application/json" class="hidden" />
                 </div>
@@ -1971,32 +2121,39 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL 2: 匯入樓層 CAD 底圖 ==================== -->
+  <!-- ==================== MODAL 2: 匯入樓層 CAD 底圖（同一樓層收納多張底圖） ==================== -->
   <div id="floorplanModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">匯入專案樓層 CAD 底圖</h3>
+        <h3 id="fpModalTitle" class="modal-title">匯入專案樓層 CAD 底圖（同樓層可收納多張）</h3>
         <button id="btnCloseFpModal" class="btn-secondary btn-sm">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-row-2">
           <div class="form-group">
-            <label class="form-label">樓層 / 區域標籤 *</label>
+            <label class="form-label">樓層 / 區域標籤（同樓層將自動歸入同一卡片）*</label>
             <input type="text" id="fpFloorInput" class="pm-input" placeholder="例如：1F、2F、B1、RF" value="1F" />
           </div>
           <div class="form-group">
-            <label class="form-label">底圖名稱 *</label>
-            <input type="text" id="fpNameInput" class="pm-input" placeholder="例如：1F 水電配置平面圖" />
+            <label class="form-label">樓層底圖群組名稱 *</label>
+            <input type="text" id="fpNameInput" class="pm-input" placeholder="例如：1F 建築與水電平面圖" />
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">選擇 CAD 圖檔（PNG / JPG / WebP，自動壓縮轉存 IndexedDB）</label>
-          <input type="file" id="fpFileInput" accept="image/*" class="pm-input" />
+          <label class="form-label">選擇 CAD 圖檔（可一次複選多張，或追加至現有樓層）*</label>
+          <input type="file" id="fpFileInput" accept="image/*" multiple class="pm-input" />
+        </div>
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label class="form-label">此樓層已收納的圖面清單（點 × 可移除單張）</label>
+            <span id="fpBatchCountBadge" class="badge badge-progress">共 0 張圖面</span>
+          </div>
+          <div id="fpImagesPreviewGrid" class="modal-photo-grid"></div>
         </div>
       </div>
       <div class="modal-footer">
         <button id="btnCancelFpModal" class="btn-secondary">取消</button>
-        <button id="btnSaveFpModal" class="btn-primary">存入底圖庫</button>
+        <button id="btnSaveFpModal" class="btn-primary">儲存至樓層底圖庫</button>
       </div>
     </div>
   </div>
@@ -2036,6 +2193,8 @@
           <div class="form-group">
             <label class="form-label">工種分類 *</label>
             <select id="recTradeSelect" class="pm-select">
+              <option value="基礎燈具安裝">基礎燈具安裝</option>
+              <option value="進口燈具安裝">進口燈具安裝</option>
               <option value="水電工程">水電工程</option>
               <option value="木作工程">木作工程</option>
               <option value="泥作工程">泥作工程</option>
@@ -2104,24 +2263,26 @@
           <div id="recPhraseChips" class="phrase-chips"></div>
         </div>
 
-        <!-- Image Binding Area -->
+        <!-- Image Binding Area (Supports Multiple Photos per Progress or Issue Record) -->
         <div class="form-row-2">
           <div class="form-group">
-            <label class="form-label" id="lblBeforePhoto">標註疊圖成果 / 改善前照片 (Before)</label>
-            <input type="file" id="recBeforeFileInput" accept="image/*" class="pm-input" />
-            <div style="display:flex;gap:6px;margin-top:4px;">
-              <button type="button" id="btnGenMockBefore" class="btn-secondary btn-sm">⚡ 產生測試標註疊圖</button>
-              <span id="beforePhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">未選擇圖片</span>
+            <label class="form-label" id="lblBeforePhoto">標註疊圖成果 / 改善前照片 (可複選或分次追加多張)</label>
+            <input type="file" id="recBeforeFileInput" accept="image/*" multiple class="pm-input" />
+            <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+              <button type="button" id="btnGenMockBefore" class="btn-secondary btn-sm">⚡ ＋追加測試標註圖</button>
+              <span id="beforePhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">共 0 張相片</span>
             </div>
+            <div id="beforePhotoPreviewGrid" class="modal-photo-grid"></div>
           </div>
 
           <div class="form-group" id="afterPhotoGroup">
-            <label class="form-label">複驗改善後對照圖 (After，結案時補綁)</label>
-            <input type="file" id="recAfterFileInput" accept="image/*" class="pm-input" />
-            <div style="display:flex;gap:6px;margin-top:4px;">
-              <button type="button" id="btnGenMockAfter" class="btn-secondary btn-sm">⚡ 產生測試改善後疊圖</button>
-              <span id="afterPhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">未綁定</span>
+            <label class="form-label">複驗改善後對照圖 (After，可複選或追加多張)</label>
+            <input type="file" id="recAfterFileInput" accept="image/*" multiple class="pm-input" />
+            <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+              <button type="button" id="btnGenMockAfter" class="btn-secondary btn-sm">⚡ ＋追加測試改善後圖</button>
+              <span id="afterPhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">共 0 張相片</span>
             </div>
+            <div id="afterPhotoPreviewGrid" class="modal-photo-grid"></div>
           </div>
         </div>
       </div>
@@ -2412,7 +2573,7 @@
         });
       }
 
-      /* ==================== 3. Application State ==================== */
+      /* ==================== 3. Application State & Multi-Photo Helpers ==================== */
       const state = {
         activeView: 'viewOverview',
         projects: [],
@@ -2423,11 +2584,152 @@
         calMonth: new Date().getMonth(), // 0-indexed
         selectedDate: todayISO(),
         editingProjectId: null,
+        editingFloorplanId: null,
+        tempFpImages: [], // [{ id, name, blob, width, height }]
         editingRecordId: null,
-        tempBeforeBlob: null,
-        tempAfterBlob: null,
+        tempBeforeBlobs: [], // [Blob, ...]
+        tempAfterBlobs: [],  // [Blob, ...]
         objectUrls: []
       };
+
+      // Normalize floorplan images (backward-compatible with single imageBlob)
+      function getFpImages(fp) {
+        if (!fp) return [];
+        if (Array.isArray(fp.images) && fp.images.length > 0) return fp.images;
+        if (fp.imageBlob) {
+          return [{
+            id: fp.id + '_img0',
+            name: fp.name || `${fp.floor} 平面圖`,
+            blob: fp.imageBlob,
+            width: fp.width || 1200,
+            height: fp.height || 820
+          }];
+        }
+        return [];
+      }
+
+      // Normalize record before/after photo arrays (backward-compatible with single beforeBlob/afterBlob)
+      // Automatically resolves bound floorplan's latest images so Floorplan Library & Calendar Records stay 100% synchronized
+      function getRecordBlobs(rec, stage = 'before') {
+        if (!rec) return [];
+        if (stage === 'after') {
+          if (Array.isArray(rec.afterBlobs) && rec.afterBlobs.length > 0) return rec.afterBlobs;
+          return rec.afterBlob ? [rec.afterBlob] : [];
+        }
+        if (rec.floorplanId && Array.isArray(state.floorplans)) {
+          const boundFp = state.floorplans.find((f) => f.id === rec.floorplanId);
+          if (boundFp) {
+            const fpImgs = getFpImages(boundFp).map((im) => im.blob).filter(Boolean);
+            if (fpImgs.length > 0) return fpImgs;
+          }
+        }
+        if (Array.isArray(rec.beforeBlobs) && rec.beforeBlobs.length > 0) return rec.beforeBlobs;
+        return rec.beforeBlob ? [rec.beforeBlob] : [];
+      }
+
+      function sanitizePathSegment(str, fallback = '未命名') {
+        const cleaned = String(str || '').replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '_').trim();
+        return cleaned || fallback;
+      }
+
+      /* ==================== 3.5 Zero-Dependency Uncompressed ZIP Builder (For Mobile & Cross-Platform Folder Export) ==================== */
+      const CRC32_TABLE = (() => {
+        const tbl = new Uint32Array(256);
+        for (let i = 0; i < 256; i++) {
+          let c = i;
+          for (let k = 0; k < 8; k++) {
+            c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+          }
+          tbl[i] = c >>> 0;
+        }
+        return tbl;
+      })();
+
+      function crc32Bytes(u8) {
+        let crc = 0xFFFFFFFF;
+        for (let i = 0; i < u8.length; i++) {
+          crc = CRC32_TABLE[(crc ^ u8[i]) & 0xFF] ^ (crc >>> 8);
+        }
+        return (crc ^ 0xFFFFFFFF) >>> 0;
+      }
+
+      // Pack array of { path: "Folder/Sub/file.jpg", bytes: Uint8Array } into a standard .zip Blob
+      function buildZipBlob(entries) {
+        const enc = new TextEncoder();
+        const localParts = [];
+        const centralParts = [];
+        let offset = 0;
+
+        const now = new Date();
+        const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+        const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+
+        for (const item of entries) {
+          const nameBytes = enc.encode(item.path);
+          const dataBytes = item.bytes;
+          const crc = crc32Bytes(dataBytes);
+          const size = dataBytes.length;
+
+          // Local file header (30 bytes + name)
+          const lfh = new Uint8Array(30 + nameBytes.length);
+          const lfv = new DataView(lfh.buffer);
+          lfv.setUint32(0, 0x04034b50, true);
+          lfv.setUint16(4, 20, true);
+          lfv.setUint16(6, 0x0800, true); // UTF-8 filename flag
+          lfv.setUint16(8, 0, true);      // Store method (0 = no recompression needed for JPEG)
+          lfv.setUint16(10, dosTime, true);
+          lfv.setUint16(12, dosDate, true);
+          lfv.setUint32(14, crc, true);
+          lfv.setUint32(18, size, true);
+          lfv.setUint32(22, size, true);
+          lfv.setUint16(26, nameBytes.length, true);
+          lfv.setUint16(28, 0, true);
+          lfh.set(nameBytes, 30);
+
+          localParts.push(lfh, dataBytes);
+
+          // Central directory header (46 bytes + name)
+          const cdh = new Uint8Array(46 + nameBytes.length);
+          const cdv = new DataView(cdh.buffer);
+          cdv.setUint32(0, 0x02014b50, true);
+          cdv.setUint16(4, 20, true);
+          cdv.setUint16(6, 20, true);
+          cdv.setUint16(8, 0x0800, true);
+          cdv.setUint16(10, 0, true);
+          cdv.setUint16(12, dosTime, true);
+          cdv.setUint16(14, dosDate, true);
+          cdv.setUint32(16, crc, true);
+          cdv.setUint32(20, size, true);
+          cdv.setUint32(24, size, true);
+          cdv.setUint16(28, nameBytes.length, true);
+          cdv.setUint16(30, 0, true);
+          cdv.setUint16(32, 0, true);
+          cdv.setUint16(34, 0, true);
+          cdv.setUint16(36, 0, true);
+          cdv.setUint32(38, 0, true);
+          cdv.setUint32(42, offset, true);
+          cdh.set(nameBytes, 46);
+
+          centralParts.push(cdh);
+          offset += lfh.length + size;
+        }
+
+        let cdSize = 0;
+        centralParts.forEach((p) => { cdSize += p.length; });
+
+        const eocd = new Uint8Array(22);
+        const eocdv = new DataView(eocd.buffer);
+        eocdv.setUint32(0, 0x06054b50, true);
+        eocdv.setUint16(4, 0, true);
+        eocdv.setUint16(6, 0, true);
+        eocdv.setUint16(8, entries.length, true);
+        eocdv.setUint16(10, entries.length, true);
+        eocdv.setUint32(12, cdSize, true);
+        eocdv.setUint32(16, offset, true);
+        eocdv.setUint16(20, 0, true);
+
+        return new Blob([...localParts, ...centralParts, eocd], { type: 'application/zip' });
+      }
 
       function revokeAllObjectUrls() {
         state.objectUrls.forEach((u) => URL.revokeObjectURL(u));
@@ -2484,6 +2786,33 @@
         state.floorplans.sort((a, b) => (a.floor || '').localeCompare(b.floor || ''));
 
         state.records = await db.getByIndex('records', 'projectId', projectId);
+
+        // Two-way database reconciliation on load: ensure every record bound to a floorplan (or matching floor) shares the unified photo/metadata state
+        for (const r of state.records) {
+          let boundFp = r.floorplanId
+            ? state.floorplans.find((f) => f.id === r.floorplanId)
+            : state.floorplans.find((f) => (f.floor || '').toUpperCase() === (r.floor || '').toUpperCase());
+
+          if (boundFp) {
+            const fpBlobs = getFpImages(boundFp).map((im) => im.blob).filter(Boolean);
+            const recBlobs = Array.isArray(r.beforeBlobs) && r.beforeBlobs.length > 0 ? r.beforeBlobs : (r.beforeBlob ? [r.beforeBlob] : []);
+            const needsSync = r.floorplanId !== boundFp.id
+              || r.floorplanName !== boundFp.name
+              || r.floor !== boundFp.floor
+              || recBlobs.length !== fpBlobs.length
+              || recBlobs[0] !== fpBlobs[0];
+
+            if (needsSync && fpBlobs.length > 0) {
+              r.floorplanId = boundFp.id;
+              r.floorplanName = boundFp.name;
+              r.floor = boundFp.floor;
+              r.beforeBlobs = [...fpBlobs];
+              r.beforeBlob = fpBlobs[0] || null;
+              await db.put('records', r);
+            }
+          }
+        }
+
         state.records.sort((a, b) => {
           if (a.date !== b.date) return b.date.localeCompare(a.date);
           return (b.createdAt || 0) - (a.createdAt || 0);
@@ -2518,6 +2847,7 @@
           projectId: projId,
           floor: '1F',
           name: '1F 建築隔間與水電平面圖',
+          images: [{ id: genId('fpimg'), name: '1F 建築隔間與水電平面圖', blob: fp1Img.blob, width: fp1Img.width, height: fp1Img.height }],
           imageBlob: fp1Img.blob,
           width: fp1Img.width,
           height: fp1Img.height,
@@ -2528,6 +2858,7 @@
           projectId: projId,
           floor: '2F',
           name: '2F 空調風管與照明配置圖',
+          images: [{ id: genId('fpimg'), name: '2F 空調風管與照明配置圖', blob: fp2Img.blob, width: fp2Img.width, height: fp2Img.height }],
           imageBlob: fp2Img.blob,
           width: fp2Img.width,
           height: fp2Img.height,
@@ -2536,35 +2867,11 @@
         await db.put('floorplans', fp1);
         await db.put('floorplans', fp2);
 
-        const prog1Blob = await createSyntheticCadBlob({
-          title: fp1.name,
-          floor: '1F',
-          mode: 'progress',
-          badgeText: '1F 配電箱與主幹管線佈設完成'
-        });
-        const prog2Blob = await createSyntheticCadBlob({
-          title: fp2.name,
-          floor: '2F',
-          mode: 'progress',
-          badgeText: '2F 輕鋼架天花與出風口定位'
-        });
-        const issue1Before = await createSyntheticCadBlob({
-          title: fp1.name,
-          floor: '1F',
-          mode: 'issue',
-          badgeText: '缺失 #001：1F 茶水間排水管洩水坡度不足'
-        });
         const issue1After = await createSyntheticCadBlob({
           title: fp1.name,
           floor: '1F',
           mode: 'after',
           badgeText: '缺失 #001 複驗：已重新調整吊架坡度並試水合格'
-        });
-        const issue2Before = await createSyntheticCadBlob({
-          title: fp2.name,
-          floor: '2F',
-          mode: 'issue',
-          badgeText: '缺失 #002：2F 會議室線型出風口位置偏移 15cm'
         });
 
         const demoRecords = [
@@ -2576,11 +2883,13 @@
             floor: '1F',
             floorplanId: fp1.id,
             floorplanName: fp1.name,
-            trade: '水電工程',
-            summary: '1F 主配電箱安裝與 EMT 管路架設',
+            trade: '基礎燈具安裝',
+            summary: '1F 主配電箱安裝與基礎燈具迴路架設',
             progressStatus: '階段完成',
             note: '1F 配電箱 弱電箱 迴路標示核對完成，已完工。',
-            beforeBlob: prog1Blob.blob,
+            beforeBlobs: [fp1Img.blob],
+            beforeBlob: fp1Img.blob,
+            afterBlobs: [],
             afterBlob: null,
             createdAt: Date.now() - 15000
           },
@@ -2598,7 +2907,9 @@
             severity: '一般',
             assignee: '宏達水電工班',
             note: '1F 茶水間排水管坡度平緩恐積水，已請工班重新調整吊筋高度，複驗試水順暢已完工。',
-            beforeBlob: issue1Before.blob,
+            beforeBlobs: [fp1Img.blob],
+            beforeBlob: fp1Img.blob,
+            afterBlobs: [issue1After.blob],
             afterBlob: issue1After.blob,
             resolvedDate: d3,
             createdAt: Date.now() - 10000
@@ -2611,11 +2922,13 @@
             floor: '2F',
             floorplanId: fp2.id,
             floorplanName: fp2.name,
-            trade: '輕隔間/天花',
-            summary: '2F 辦公區暗架天花板骨架與軟條燈槽施作',
+            trade: '進口燈具安裝',
+            summary: '2F 辦公區暗架天花板與進口燈具定位施作',
             progressStatus: '施作中',
             note: '2F LED 軟條燈 嵌燈 開孔位置確認中。',
-            beforeBlob: prog2Blob.blob,
+            beforeBlobs: [fp2Img.blob],
+            beforeBlob: fp2Img.blob,
+            afterBlobs: [],
             afterBlob: null,
             createdAt: Date.now() - 5000
           },
@@ -2633,7 +2946,9 @@
             severity: '緊急',
             assignee: '大成空調工程行',
             note: '2F 出風口 位置偏移，與木作造型天花燈槽衝突，待修繕。',
-            beforeBlob: issue2Before.blob,
+            beforeBlobs: [fp2Img.blob],
+            beforeBlob: fp2Img.blob,
+            afterBlobs: [],
             afterBlob: null,
             createdAt: Date.now() - 2000
           }
@@ -2680,9 +2995,10 @@
         const issueOpen = issueList.length - issueClosed;
         const rate = issueList.length === 0 ? 100 : Math.round((issueClosed / issueList.length) * 100);
 
+        const totalFpImages = state.floorplans.reduce((acc, fp) => acc + getFpImages(fp).length, 0);
         document.getElementById('kpiProjectStatus').textContent = proj.status || '進行中';
         document.getElementById('kpiProjectPeriod').textContent = `${proj.startDate || '--'} ~ ${proj.endDate || '--'}`;
-        document.getElementById('kpiFloorplanCount').textContent = state.floorplans.length;
+        document.getElementById('kpiFloorplanCount').textContent = `${state.floorplans.length} 樓層 (${totalFpImages})`;
         document.getElementById('kpiProgressCount').textContent = progList.length;
         document.getElementById('kpiProgressCompleted').textContent = `階段完成 ${progDone} 筆 / 施作中 ${progList.length - progDone} 筆`;
         document.getElementById('kpiIssueRate').textContent = `${rate}%`;
@@ -2711,38 +3027,75 @@
         grid.innerHTML = '';
 
         if (state.floorplans.length === 0) {
-          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">尚未建立樓層 CAD 底圖。點擊右上角「＋匯入樓層 CAD 底圖」預先存入專案，日後新增紀錄即可一鍵選用。</div>`;
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">尚未建立樓層 CAD 底圖。點擊右上角「＋匯入樓層 CAD 底圖」預先存入專案，同一樓層可收納多張平面圖。</div>`;
           return;
         }
 
         state.floorplans.forEach((fp) => {
-          const imgUrl = createManagedObjectUrl(fp.imageBlob);
+          const images = getFpImages(fp);
+          const primaryImg = images[0] || { blob: fp.imageBlob, name: fp.name, width: fp.width, height: fp.height };
+          const imgUrls = images.map((im) => ({
+            ...im,
+            url: createManagedObjectUrl(im.blob)
+          }));
+          let currentIdx = 0;
+
           const relatedCount = state.records.filter((r) => r.floorplanId === fp.id || r.floor === fp.floor).length;
           const card = document.createElement('div');
           card.className = 'fp-card';
+
+          const miniStripHtml = imgUrls.length > 1
+            ? `<div class="fp-mini-strip">${imgUrls.map((im, idx) => `
+                <div class="fp-mini-item ${idx === 0 ? 'active' : ''}" data-idx="${idx}" title="${im.name || `圖面 ${idx + 1}`}">
+                  <img src="${im.url}" alt="${im.name || ''}" />
+                </div>
+              `).join('')}</div>`
+            : '';
+
           card.innerHTML = `
             <div class="fp-thumb-wrap">
-              <img class="fp-thumb" src="${imgUrl}" alt="${fp.name}" />
+              <img class="fp-thumb" src="${imgUrls[0]?.url || ''}" alt="${fp.name}" />
               <span class="fp-floor-tag">${fp.floor}</span>
+              <span class="fp-count-badge">共 ${imgUrls.length} 張圖</span>
             </div>
             <div class="fp-body">
               <div class="fp-title" title="${fp.name}">${fp.name}</div>
-              <div class="fp-meta">尺寸 ${fp.width || '--'}×${fp.height || '--'} px ｜ 關聯紀錄 ${relatedCount} 筆</div>
+              ${miniStripHtml}
+              <div class="fp-meta"><span class="fp-active-label">${imgUrls[0]?.name || fp.name}</span> ｜ 關聯紀錄 ${relatedCount} 筆</div>
               <div class="fp-actions">
-                <button class="btn-primary btn-sm" style="flex:1;" data-act="use-fp" data-id="${fp.id}">＋新增此樓層紀錄</button>
+                <button class="btn-primary btn-sm" style="flex:1;" data-act="use-fp" data-id="${fp.id}">＋此樓層紀錄</button>
+                <button class="btn-secondary btn-sm" data-act="edit-fp" data-id="${fp.id}" title="管理或追加此樓層的多張底圖">＋圖(${imgUrls.length})</button>
                 <button class="btn-secondary btn-sm" data-act="open-cad" data-id="${fp.id}" title="載入此底圖至 CAD 畫布">畫布</button>
-                <button class="btn-danger btn-sm" data-act="del-fp" data-id="${fp.id}" title="刪除底圖">✕</button>
+                <button class="btn-danger btn-sm" data-act="del-fp" data-id="${fp.id}" title="刪除此樓層底圖群組">✕</button>
               </div>
             </div>
           `;
-          card.querySelector('.fp-thumb').addEventListener('click', () => openLightbox(imgUrl, `${fp.floor} - ${fp.name}`));
+
+          const mainThumbEl = card.querySelector('.fp-thumb');
+          const activeLabelEl = card.querySelector('.fp-active-label');
+
+          card.querySelectorAll('.fp-mini-item').forEach((miniEl) => {
+            miniEl.addEventListener('click', () => {
+              const idx = parseInt(miniEl.dataset.idx, 10) || 0;
+              currentIdx = idx;
+              mainThumbEl.src = imgUrls[idx]?.url || '';
+              if (activeLabelEl) activeLabelEl.textContent = imgUrls[idx]?.name || fp.name;
+              card.querySelectorAll('.fp-mini-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+            });
+          });
+
+          mainThumbEl.addEventListener('click', () => {
+            const cur = imgUrls[currentIdx] || imgUrls[0];
+            if (cur) openLightbox(cur.url, `${fp.floor} - ${cur.name || fp.name} (${currentIdx + 1}/${imgUrls.length})`);
+          });
           card.querySelector('[data-act="use-fp"]').addEventListener('click', () => openRecordModal({ floorplanId: fp.id, floor: fp.floor }));
-          card.querySelector('[data-act="open-cad"]').addEventListener('click', () => launchCadCanvasWithContext({ floorplanId: fp.id, floor: fp.floor, floorplanName: fp.name }));
+          card.querySelector('[data-act="edit-fp"]').addEventListener('click', () => openFloorplanModal(fp));
+          card.querySelector('[data-act="open-cad"]').addEventListener('click', () => launchCadCanvasWithContext({ floorplanId: fp.id, floor: fp.floor, floorplanName: imgUrls[currentIdx]?.name || fp.name }));
           card.querySelector('[data-act="del-fp"]').addEventListener('click', async () => {
-            if (!confirm(`確定要刪除底圖「${fp.name}」嗎？`)) return;
+            if (!confirm(`確定要刪除「${fp.floor} - ${fp.name}」（共 ${imgUrls.length} 張圖面）嗎？`)) return;
             await db.delete('floorplans', fp.id);
             await loadProjectData(state.currentProjectId);
-            showToast('已刪除底圖');
+            showToast('已刪除樓層底圖');
           });
           grid.appendChild(card);
         });
@@ -2904,15 +3257,17 @@
         });
       }
 
-      /* ==================== 8. Shared Record Card Component ==================== */
+      /* ==================== 8. Shared Record Card Component (Multi-Photo Gallery per Record) ==================== */
       function createRecordCardDOM(rec) {
         const isIssue = rec.type === 'issue';
         const isClosed = isIssue && rec.issueStatus === '已結案';
         const card = document.createElement('div');
         card.className = `record-card ${isIssue ? (isClosed ? 'issue-closed' : 'issue-open') : 'progress-item'}`;
 
-        const beforeUrl = createManagedObjectUrl(rec.beforeBlob);
-        const afterUrl = createManagedObjectUrl(rec.afterBlob);
+        const beforeBlobs = getRecordBlobs(rec, 'before');
+        const afterBlobs = isIssue ? getRecordBlobs(rec, 'after') : [];
+        const beforeUrls = beforeBlobs.map((b) => createManagedObjectUrl(b)).filter(Boolean);
+        const afterUrls = afterBlobs.map((b) => createManagedObjectUrl(b)).filter(Boolean);
 
         let badgesHtml = '';
         if (isIssue) {
@@ -2924,29 +3279,39 @@
         }
         badgesHtml += `<span class="badge badge-neutral">${rec.floor || '未標樓層'}</span>`;
         badgesHtml += `<span class="badge badge-neutral">${rec.trade || '未分類工種'}</span>`;
+        const totalPhotoCount = beforeUrls.length + afterUrls.length;
+        if (totalPhotoCount > 1) {
+          badgesHtml += `<span class="badge badge-progress">🖼️ 共 ${totalPhotoCount} 張相片</span>`;
+        }
 
         const titleText = isIssue
           ? `缺失項目 ${rec.issueCode || ''}（責任工班：${rec.assignee || '未指定'}）`
           : (rec.summary || '施工進度紀錄');
 
         let photosHtml = '';
-        if (beforeUrl || afterUrl) {
+        if (beforeUrls.length > 0 || afterUrls.length > 0) {
           photosHtml = `<div class="record-photos">`;
-          if (beforeUrl) {
+          beforeUrls.forEach((url, idx) => {
+            const label = isIssue
+              ? `改善前 Before${beforeUrls.length > 1 ? ` (${idx + 1}/${beforeUrls.length})` : ''}`
+              : `進度相片${beforeUrls.length > 1 ? ` (${idx + 1}/${beforeUrls.length})` : ''}`;
             photosHtml += `
-              <div class="photo-box" data-preview="before">
-                <img src="${beforeUrl}" alt="標註圖" />
-                <span class="photo-box-tag ${isIssue ? 'before' : ''}">${isIssue ? '改善前 (Before)' : 'CAD 標註疊圖'}</span>
+              <div class="photo-box" data-preview="before" data-idx="${idx}">
+                <img src="${url}" alt="${label}" />
+                <span class="photo-box-tag ${isIssue ? 'before' : ''}">${label}</span>
               </div>
             `;
-          }
-          if (isIssue && afterUrl) {
-            photosHtml += `
-              <div class="photo-box" data-preview="after">
-                <img src="${afterUrl}" alt="改善後照片" />
-                <span class="photo-box-tag after">改善後 (After)</span>
-              </div>
-            `;
+          });
+          if (isIssue) {
+            afterUrls.forEach((url, idx) => {
+              const label = `改善後 After${afterUrls.length > 1 ? ` (${idx + 1}/${afterUrls.length})` : ''}`;
+              photosHtml += `
+                <div class="photo-box" data-preview="after" data-idx="${idx}">
+                  <img src="${url}" alt="${label}" />
+                  <span class="photo-box-tag after">${label}</span>
+                </div>
+              `;
+            });
           }
           photosHtml += `</div>`;
         }
@@ -2958,7 +3323,7 @@
               ${isIssue && !isClosed ? `<button class="btn-success btn-sm" data-act="verify-close">📸 補綁改善後照片並結案</button>` : ''}
               ${isIssue ? `<button class="btn-secondary btn-sm" data-act="toggle-status">${isClosed ? '設為待處理' : '✔ 直接勾選結案'}</button>` : ''}
               <button class="btn-secondary btn-sm" data-act="open-canvas" title="帶入此紀錄底圖開啟 CAD 畫布">進入畫布</button>
-              <button class="btn-secondary btn-sm" data-act="edit">編輯</button>
+              <button class="btn-secondary btn-sm" data-act="edit">編輯 / ＋相片</button>
               <button class="btn-danger btn-sm" data-act="delete">刪除</button>
             </div>
           </div>
@@ -2971,12 +3336,14 @@
           </div>
         `;
 
-        if (beforeUrl) {
-          card.querySelector('[data-preview="before"]')?.addEventListener('click', () => openLightbox(beforeUrl, `${titleText} - 改善前/標註圖`));
-        }
-        if (afterUrl) {
-          card.querySelector('[data-preview="after"]')?.addEventListener('click', () => openLightbox(afterUrl, `${titleText} - 改善後對照圖`));
-        }
+        card.querySelectorAll('[data-preview="before"]').forEach((box) => {
+          const idx = parseInt(box.dataset.idx, 10) || 0;
+          box.addEventListener('click', () => openLightbox(beforeUrls[idx], `${titleText} - 改善前/進度圖 (${idx + 1}/${beforeUrls.length})`));
+        });
+        card.querySelectorAll('[data-preview="after"]').forEach((box) => {
+          const idx = parseInt(box.dataset.idx, 10) || 0;
+          box.addEventListener('click', () => openLightbox(afterUrls[idx], `${titleText} - 改善後對照圖 (${idx + 1}/${afterUrls.length})`));
+        });
 
         card.querySelector('[data-act="verify-close"]')?.addEventListener('click', () => {
           openRecordModal({ editRecord: rec, focusAfterPhoto: true });
@@ -3053,7 +3420,8 @@
         };
       }
 
-      function buildReportInnerHtml(proj, data, urlResolver) {
+      // urlListResolver(rec, 'before' | 'after') returns array of image URLs / DataURLs
+      function buildReportInnerHtml(proj, data, urlListResolver) {
         const totalIssues = data.allIssuesInRange.length;
         const closedIssues = data.allIssuesInRange.filter((r) => r.issueStatus === '已結案').length;
         const rateStr = totalIssues === 0 ? '100% (0/0)' : `${Math.round((closedIssues / totalIssues) * 100)}% (已結案 ${closedIssues} / 總計 ${totalIssues})`;
@@ -3086,30 +3454,35 @@
           </table>
         `;
 
-        // Section 1: Construction Progress
+        // Section 1: Construction Progress (Supports Multiple Photos per Progress Item)
         if (data.scope === 'both' || data.scope === 'progress') {
           html += `<h2 class="rpt-section-title">壹、施工進度紀錄區（依日期與樓層排序）</h2>`;
           if (data.progressList.length === 0) {
             html += `<div class="rpt-card" style="color:#64748b;text-align:center;">所選日期區間內無施工進度紀錄</div>`;
           } else {
             data.progressList.forEach((p, idx) => {
-              const imgSrc = urlResolver(p, 'before');
+              const imgUrls = urlListResolver(p, 'before');
+              const isMulti = imgUrls.length > 1;
               html += `
                 <div class="rpt-card">
                   <div class="rpt-card-head">
                     <span>#${idx + 1} ｜ 日期：${p.date} ｜ 樓層：${p.floor || '--'} ｜ 工種：${p.trade || '--'}</span>
-                    <span class="rpt-tag prog">${p.progressStatus || '施作中'}</span>
+                    <span class="rpt-tag prog">${p.progressStatus || '施作中'}（附圖 ${imgUrls.length} 張）</span>
                   </div>
-                  <div class="rpt-progress-body">
+                  <div class="${isMulti ? '' : 'rpt-progress-body'}">
                     <div>
                       <div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">施作工項：${p.summary || '--'}</div>
                       <div style="font-size:12.5px;color:#334155;white-space:pre-wrap;">現場備註：${p.note || '--'}</div>
-                      <div style="font-size:11.5px;color:#64748b;margin-top:6px;">對應底圖：${p.floorplanName || '--'}</div>
+                      <div style="font-size:11.5px;color:#64748b;margin-top:4px;">對應底圖：${p.floorplanName || '--'}</div>
                     </div>
-                    ${imgSrc ? `
-                      <div class="rpt-img-box">
-                        <img src="${imgSrc}" alt="施工進度標註疊圖" />
-                        <div class="rpt-img-cap">CAD 疊圖標註成果</div>
+                    ${imgUrls.length > 0 ? `
+                      <div class="${isMulti ? 'rpt-multi-photos' : ''}">
+                        ${imgUrls.map((src, i) => `
+                          <div class="rpt-img-box">
+                            <img src="${src}" alt="施工進度相片 ${i + 1}" />
+                            <div class="rpt-img-cap">進度相片 ${imgUrls.length > 1 ? `#${i + 1}` : '標註成果'}</div>
+                          </div>
+                        `).join('')}
                       </div>
                     ` : `<div class="rpt-img-box" style="color:#94a3b8;padding:24px 8px;font-size:12px;">無附圖</div>`}
                   </div>
@@ -3119,7 +3492,7 @@
           }
         }
 
-        // Section 2: Issue / Punch List Tracking
+        // Section 2: Issue / Punch List Tracking (Supports Multiple Before/After Photos)
         if (data.scope === 'both' || data.scope === 'issues') {
           html += `<h2 class="rpt-section-title">貳、問題／缺失改善追蹤表（改善前 vs. 改善後對照）</h2>`;
           if (data.filteredIssues.length === 0) {
@@ -3127,8 +3500,8 @@
           } else {
             data.filteredIssues.forEach((iss) => {
               const isClosed = iss.issueStatus === '已結案';
-              const beforeSrc = urlResolver(iss, 'before');
-              const afterSrc = urlResolver(iss, 'after');
+              const beforeUrls = urlListResolver(iss, 'before');
+              const afterUrls = urlListResolver(iss, 'after');
               html += `
                 <div class="rpt-card">
                   <div class="rpt-card-head">
@@ -3144,12 +3517,16 @@
                   </div>
                   <div class="rpt-issue-photos">
                     <div class="rpt-img-box">
-                      ${beforeSrc ? `<img src="${beforeSrc}" alt="改善前照片" />` : `<div style="padding:36px 0;color:#94a3b8;font-size:12px;">未附改善前照片</div>`}
-                      <div class="rpt-img-cap">【改善前 Before】標註圖</div>
+                      ${beforeUrls.length > 0
+                        ? beforeUrls.map((src, i) => `<img src="${src}" alt="改善前照片 ${i + 1}" style="margin-bottom:4px;" />`).join('')
+                        : `<div style="padding:36px 0;color:#94a3b8;font-size:12px;">未附改善前照片</div>`}
+                      <div class="rpt-img-cap">【改善前 Before】標註圖 (${beforeUrls.length} 張)</div>
                     </div>
                     <div class="rpt-img-box">
-                      ${afterSrc ? `<img src="${afterSrc}" alt="改善後照片" />` : `<div style="padding:36px 0;color:#94a3b8;font-size:12px;">${isClosed ? '已結案（未附對照圖）' : '待工班改善後補拍複驗'}</div>`}
-                      <div class="rpt-img-cap">【改善後 After】複驗對照圖</div>
+                      ${afterUrls.length > 0
+                        ? afterUrls.map((src, i) => `<img src="${src}" alt="改善後照片 ${i + 1}" style="margin-bottom:4px;" />`).join('')
+                        : `<div style="padding:36px 0;color:#94a3b8;font-size:12px;">${isClosed ? '已結案（未附對照圖）' : '待工班改善後補拍複驗'}</div>`}
+                      <div class="rpt-img-cap">【改善後 After】複驗對照圖 (${afterUrls.length} 張)</div>
                     </div>
                   </div>
                 </div>
@@ -3175,34 +3552,37 @@
 
         const data = getFilteredReportData();
         paper.innerHTML = buildReportInnerHtml(proj, data, (rec, stage) => {
-          const blob = stage === 'after' ? rec.afterBlob : rec.beforeBlob;
-          return createManagedObjectUrl(blob);
+          const blobs = getRecordBlobs(rec, stage);
+          return blobs.map((b) => createManagedObjectUrl(b)).filter(Boolean);
         });
       }
 
-      // Export Self-Contained Printable A4 HTML File (with embedded Base64 images)
-      async function exportStandaloneA4HtmlFile() {
+      async function generateStandaloneA4HtmlString() {
         const proj = getCurrentProject();
-        if (!proj) return;
-        showToast('正在封裝 A4 HTML 報告（內嵌高解析圖片）...');
-
         const data = getFilteredReportData();
-        const base64Map = {};
+        const base64ListMap = {};
 
         for (const rec of [...data.progressList, ...data.filteredIssues]) {
-          if (rec.beforeBlob) {
-            base64Map[`${rec.id}_before`] = await blobToDataURL(rec.beforeBlob);
+          const bBlobs = getRecordBlobs(rec, 'before');
+          base64ListMap[`${rec.id}_before`] = [];
+          for (const b of bBlobs) {
+            base64ListMap[`${rec.id}_before`].push(await blobToDataURL(b));
           }
-          if (rec.afterBlob) {
-            base64Map[`${rec.id}_after`] = await blobToDataURL(rec.afterBlob);
+
+          const aBlobs = getRecordBlobs(rec, 'after');
+          base64ListMap[`${rec.id}_after`] = [];
+          for (const b of aBlobs) {
+            base64ListMap[`${rec.id}_after`].push(await blobToDataURL(b));
           }
         }
 
         const reportBodyHtml = buildReportInnerHtml(proj, data, (rec, stage) => {
-          return base64Map[`${rec.id}_${stage}`] || '';
+          return base64ListMap[`${rec.id}_${stage}`] || [];
         });
 
-        const standaloneHtml = `<!DOCTYPE html>
+        return {
+          data,
+          html: `<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -3261,6 +3641,7 @@
     .rpt-tag.closed { background: #f0fdf4; color: #15803d; border-color: #4ade80; }
     .rpt-tag.prog { background: #f0f9ff; color: #0369a1; border-color: #38bdf8; }
     .rpt-progress-body { display: grid; grid-template-columns: 1fr 220px; gap: 12px; align-items: start; }
+    .rpt-multi-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 8px; margin-top: 6px; }
     .rpt-issue-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
     .rpt-img-box { border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; text-align: center; background: #f8fafc; }
     .rpt-img-box img { max-width: 100%; max-height: 180px; object-fit: contain; display: block; margin: 0 auto; }
@@ -3284,9 +3665,16 @@
     ${reportBodyHtml}
   </article>
 </body>
-</html>`;
+</html>`
+        };
+      }
 
-        const blob = new Blob([standaloneHtml], { type: 'text/html;charset=utf-8' });
+      async function exportStandaloneA4HtmlFile() {
+        const proj = getCurrentProject();
+        if (!proj) return;
+        showToast('正在封裝 A4 HTML 報告（內嵌高解析圖片）...');
+        const { data, html } = await generateStandaloneA4HtmlString();
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -3296,35 +3684,268 @@
         showToast('已下載獨立可列印 A4 HTML 報告檔');
       }
 
-      /* ==================== 10. Full Project JSON Backup & Restore (with Base64 Images) ==================== */
-      async function exportProjectJsonBackup() {
+      /* ==================== 9.5 Structured Project Folder Export (Method B: Desktop Directory vs. Mobile ZIP/Share) ==================== */
+      // Build structured virtual file tree: [{ dirParts: ['02_施工進度', '2026-11-05_1F_...'], fileName: '進度照片_01.jpg', blobOrText }]
+      async function buildProjectFolderManifest() {
         const proj = getCurrentProject();
-        if (!proj) return;
-        const includeImages = document.getElementById('chkBackupWithImages').checked;
-        showToast(includeImages ? '正在打包專案完整備份（含所有底圖與照片）...' : '正在打包輕量文字備份...');
+        if (!proj) return null;
 
+        const rootFolderName = `${sanitizePathSegment(proj.name, '工程專案')}_${todayISO()}`;
+        const files = [];
+
+        // 1. Standalone A4 HTML Report
+        const { html: a4Html } = await generateStandaloneA4HtmlString();
+        files.push({
+          dirParts: [],
+          fileName: '00_A4工程進度與缺失報告.html',
+          content: new Blob([a4Html], { type: 'text/html;charset=utf-8' })
+        });
+
+        // 2. Full System JSON Backup
+        const jsonBackupObj = await buildBackupPayloadObject(true);
+        files.push({
+          dirParts: [],
+          fileName: '00_專案完整系統備份.json',
+          content: new Blob([JSON.stringify(jsonBackupObj, null, 2)], { type: 'application/json;charset=utf-8' })
+        });
+
+        // 3. 01_CAD樓層底圖/<樓層>/...
+        for (const fp of state.floorplans) {
+          const floorSeg = sanitizePathSegment(fp.floor, '未分樓層');
+          const imgs = getFpImages(fp);
+          imgs.forEach((im, idx) => {
+            if (!im.blob) return;
+            const imgName = sanitizePathSegment(im.name || fp.name, '平面圖');
+            files.push({
+              dirParts: ['01_CAD樓層底圖', floorSeg],
+              fileName: `${floorSeg}_${imgName}_${String(idx + 1).padStart(2, '0')}.jpg`,
+              content: im.blob
+            });
+          });
+        }
+
+        // 4. 02_施工進度/<日期_樓層_工種_工項>/...
+        const progRecords = state.records.filter((r) => r.type === 'progress');
+        for (const rec of progRecords) {
+          const folderName = `${rec.date || todayISO()}_${sanitizePathSegment(rec.floor, '1F')}_${sanitizePathSegment(rec.trade, '工種')}_${sanitizePathSegment(rec.summary, '施工進度').slice(0, 28)}`;
+          const bBlobs = getRecordBlobs(rec, 'before');
+          bBlobs.forEach((b, idx) => {
+            files.push({
+              dirParts: ['02_施工進度', folderName],
+              fileName: `進度相片_${String(idx + 1).padStart(2, '0')}.jpg`,
+              content: b
+            });
+          });
+
+          const infoTxt = [
+            `【施工進度紀錄】`,
+            `專案名稱：${proj.name}`,
+            `紀錄日期：${rec.date}`,
+            `樓層區域：${rec.floor || '--'}（底圖：${rec.floorplanName || '--'}）`,
+            `工種分類：${rec.trade || '--'}`,
+            `施作工項：${rec.summary || '--'}`,
+            `進度狀態：${rec.progressStatus || '--'}`,
+            `相片數量：${bBlobs.length} 張`,
+            `現場備註：`,
+            rec.note || '（無）'
+          ].join('\r\n');
+
+          files.push({
+            dirParts: ['02_施工進度', folderName],
+            fileName: '紀錄說明.txt',
+            content: new Blob([infoTxt], { type: 'text/plain;charset=utf-8' })
+          });
+        }
+
+        // 5. 03_問題缺失追蹤/<待處理|已結案>/<編號_樓層_工種_工班>/...
+        const issueRecords = state.records.filter((r) => r.type === 'issue');
+        for (const iss of issueRecords) {
+          const statusFolder = iss.issueStatus === '已結案' ? '已結案' : '待處理';
+          const itemFolder = `${sanitizePathSegment(iss.issueCode, '#000')}_${sanitizePathSegment(iss.floor, '1F')}_${sanitizePathSegment(iss.trade, '工種')}_${sanitizePathSegment(iss.severity || '一般')}_${sanitizePathSegment(iss.assignee || '未指定工班')}`;
+
+          const beforeBlobs = getRecordBlobs(iss, 'before');
+          beforeBlobs.forEach((b, idx) => {
+            files.push({
+              dirParts: ['03_問題缺失追蹤', statusFolder, itemFolder],
+              fileName: `改善前_Before_${String(idx + 1).padStart(2, '0')}.jpg`,
+              content: b
+            });
+          });
+
+          const afterBlobs = getRecordBlobs(iss, 'after');
+          afterBlobs.forEach((b, idx) => {
+            files.push({
+              dirParts: ['03_問題缺失追蹤', statusFolder, itemFolder],
+              fileName: `改善後_After_${String(idx + 1).padStart(2, '0')}.jpg`,
+              content: b
+            });
+          });
+
+          const issueTxt = [
+            `【問題／缺失改善追蹤紀錄】`,
+            `專案名稱：${proj.name}`,
+            `缺失編號：${iss.issueCode || '--'}`,
+            `目前狀態：${iss.issueStatus || '--'}`,
+            `嚴重程度：${iss.severity || '一般'}`,
+            `開立日期：${iss.date || '--'}`,
+            `結案日期：${iss.resolvedDate || '尚未結案'}`,
+            `樓層區域：${iss.floor || '--'}（底圖：${iss.floorplanName || '--'}）`,
+            `工種分類：${iss.trade || '--'}`,
+            `責任工班：${iss.assignee || '--'}`,
+            `改善前相片：${beforeBlobs.length} 張 ／ 改善後相片：${afterBlobs.length} 張`,
+            `缺失說明與複驗備註：`,
+            iss.note || '（無）'
+          ].join('\r\n');
+
+          files.push({
+            dirParts: ['03_問題缺失追蹤', statusFolder, itemFolder],
+            fileName: '缺失與複驗說明.txt',
+            content: new Blob([issueTxt], { type: 'text/plain;charset=utf-8' })
+          });
+        }
+
+        return { rootFolderName, files };
+      }
+
+      // Desktop Mode: Write real folder hierarchy directly to local disk via File System Access API
+      async function exportProjectToDesktopDirectory() {
+        if (typeof window.showDirectoryPicker !== 'function') {
+          const fallback = confirm('您目前的瀏覽器或行動裝置不支援直接建立硬碟資料夾（showDirectoryPicker），是否改為匯出相同資料夾結構的「.zip 專案資料夾壓縮包」？');
+          if (fallback) await exportProjectAsStructuredZip();
+          return;
+        }
+
+        try {
+          const parentDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          showToast('正在建立專案資料夾與分類子目錄並寫入檔案...');
+
+          const manifest = await buildProjectFolderManifest();
+          if (!manifest) return;
+
+          const projectDirHandle = await parentDirHandle.getDirectoryHandle(manifest.rootFolderName, { create: true });
+
+          for (const item of manifest.files) {
+            let currentDir = projectDirHandle;
+            for (const subName of item.dirParts) {
+              currentDir = await currentDir.getDirectoryHandle(subName, { create: true });
+            }
+            const fileHandle = await currentDir.getFileHandle(item.fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(item.content);
+            await writable.close();
+          }
+
+          showToast(`✔ 已於本機建立「${manifest.rootFolderName}」資料夾（共寫入 ${manifest.files.length} 個檔案）`, 3800);
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+          console.error(err);
+          alert('建立本機資料夾失敗：' + err.message);
+        }
+      }
+
+      // Mobile / Cross-Platform Mode: Build structured .zip folder package and trigger Web Share API or direct download
+      async function exportProjectAsStructuredZip() {
+        try {
+          showToast('正在打包結構化專案資料夾 (.zip)...');
+          const manifest = await buildProjectFolderManifest();
+          if (!manifest) return;
+
+          const zipEntries = [];
+          for (const item of manifest.files) {
+            const relPath = [manifest.rootFolderName, ...item.dirParts, item.fileName].join('/');
+            const ab = await item.content.arrayBuffer();
+            zipEntries.push({
+              path: relPath,
+              bytes: new Uint8Array(ab)
+            });
+          }
+
+          const zipBlob = buildZipBlob(zipEntries);
+          const zipFileName = `${manifest.rootFolderName}.zip`;
+
+          // On mobile devices (iOS / Android), offer native Share sheet if supported for files
+          const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+          if (isMobileDevice && navigator.canShare) {
+            const zipFileObj = new File([zipBlob], zipFileName, { type: 'application/zip' });
+            if (navigator.canShare({ files: [zipFileObj] })) {
+              try {
+                await navigator.share({
+                  title: manifest.rootFolderName,
+                  text: '工程進度與缺失改善專案資料夾歸檔包',
+                  files: [zipFileObj]
+                });
+                showToast('已透過行動裝置分享選單匯出專案資料夾包');
+                return;
+              } catch (shareErr) {
+                if (shareErr && shareErr.name === 'AbortError') return;
+              }
+            }
+          }
+
+          // Standard download fallback
+          const url = URL.createObjectURL(zipBlob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = zipFileName;
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast(`✔ 已匯出結構化資料夾壓縮包「${zipFileName}」`, 3200);
+        } catch (err) {
+          console.error(err);
+          alert('打包結構化 ZIP 失敗：' + err.message);
+        }
+      }
+
+      /* ==================== 10. Full Project JSON Backup & Restore (with Multi-Photo Base64 Images) ==================== */
+      async function buildBackupPayloadObject(includeImages = true) {
+        const proj = getCurrentProject();
         const serializedFloorplans = [];
         for (const fp of state.floorplans) {
+          const imgs = getFpImages(fp);
+          const serializedImgs = [];
+          for (const im of imgs) {
+            serializedImgs.push({
+              id: im.id,
+              name: im.name,
+              width: im.width,
+              height: im.height,
+              dataUrl: includeImages && im.blob ? await blobToDataURL(im.blob) : null
+            });
+          }
           serializedFloorplans.push({
             ...fp,
             imageBlob: undefined,
-            imageDataUrl: includeImages && fp.imageBlob ? await blobToDataURL(fp.imageBlob) : null
+            images: undefined,
+            imageDataUrl: includeImages && imgs[0]?.blob ? await blobToDataURL(imgs[0].blob) : null,
+            imagesData: serializedImgs
           });
         }
 
         const serializedRecords = [];
         for (const rec of state.records) {
+          const bBlobs = getRecordBlobs(rec, 'before');
+          const aBlobs = getRecordBlobs(rec, 'after');
+          const beforeDataUrls = [];
+          const afterDataUrls = [];
+          if (includeImages) {
+            for (const b of bBlobs) beforeDataUrls.push(await blobToDataURL(b));
+            for (const b of aBlobs) afterDataUrls.push(await blobToDataURL(b));
+          }
           serializedRecords.push({
             ...rec,
             beforeBlob: undefined,
             afterBlob: undefined,
-            beforeDataUrl: includeImages && rec.beforeBlob ? await blobToDataURL(rec.beforeBlob) : null,
-            afterDataUrl: includeImages && rec.afterBlob ? await blobToDataURL(rec.afterBlob) : null
+            beforeBlobs: undefined,
+            afterBlobs: undefined,
+            beforeDataUrl: beforeDataUrls[0] || null,
+            afterDataUrl: afterDataUrls[0] || null,
+            beforeDataUrls,
+            afterDataUrls
           });
         }
 
-        const backupPayload = {
-          backupVersion: 'v2.1',
+        return {
+          backupVersion: 'v2.2',
           exportedAt: new Date().toISOString(),
           includeImages,
           project: proj,
@@ -3332,7 +3953,15 @@
           records: serializedRecords,
           phrases: loadQuickPhrases()
         };
+      }
 
+      async function exportProjectJsonBackup() {
+        const proj = getCurrentProject();
+        if (!proj) return;
+        const includeImages = document.getElementById('chkBackupWithImages').checked;
+        showToast(includeImages ? '正在打包專案完整備份（含所有多張底圖與照片）...' : '正在打包輕量文字備份...');
+
+        const backupPayload = await buildBackupPayloadObject(includeImages);
         const jsonStr = JSON.stringify(backupPayload, null, 2);
         const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -3358,26 +3987,70 @@
 
           if (Array.isArray(data.floorplans)) {
             for (const fp of data.floorplans) {
-              const imageBlob = fp.imageDataUrl ? await dataURLToBlob(fp.imageDataUrl) : null;
-              const cleanFp = { ...fp, imageBlob };
+              const images = [];
+              if (Array.isArray(fp.imagesData) && fp.imagesData.length > 0) {
+                for (const im of fp.imagesData) {
+                  const blob = im.dataUrl ? await dataURLToBlob(im.dataUrl) : null;
+                  if (blob) images.push({ id: im.id || genId('fpimg'), name: im.name || fp.name, width: im.width, height: im.height, blob });
+                }
+              } else if (fp.imageDataUrl) {
+                const blob = await dataURLToBlob(fp.imageDataUrl);
+                if (blob) images.push({ id: genId('fpimg'), name: fp.name, width: fp.width, height: fp.height, blob });
+              }
+              const cleanFp = {
+                ...fp,
+                images,
+                imageBlob: images[0]?.blob || null,
+                width: images[0]?.width || fp.width,
+                height: images[0]?.height || fp.height
+              };
               delete cleanFp.imageDataUrl;
+              delete cleanFp.imagesData;
               await db.put('floorplans', cleanFp);
             }
           }
 
           if (Array.isArray(data.records)) {
             for (const rec of data.records) {
-              const beforeBlob = rec.beforeDataUrl ? await dataURLToBlob(rec.beforeDataUrl) : null;
-              const afterBlob = rec.afterDataUrl ? await dataURLToBlob(rec.afterDataUrl) : null;
-              const cleanRec = { ...rec, beforeBlob, afterBlob };
+              const beforeBlobs = [];
+              if (Array.isArray(rec.beforeDataUrls) && rec.beforeDataUrls.length > 0) {
+                for (const u of rec.beforeDataUrls) {
+                  const b = u ? await dataURLToBlob(u) : null;
+                  if (b) beforeBlobs.push(b);
+                }
+              } else if (rec.beforeDataUrl) {
+                const b = await dataURLToBlob(rec.beforeDataUrl);
+                if (b) beforeBlobs.push(b);
+              }
+
+              const afterBlobs = [];
+              if (Array.isArray(rec.afterDataUrls) && rec.afterDataUrls.length > 0) {
+                for (const u of rec.afterDataUrls) {
+                  const b = u ? await dataURLToBlob(u) : null;
+                  if (b) afterBlobs.push(b);
+                }
+              } else if (rec.afterDataUrl) {
+                const b = await dataURLToBlob(rec.afterDataUrl);
+                if (b) afterBlobs.push(b);
+              }
+
+              const cleanRec = {
+                ...rec,
+                beforeBlobs,
+                afterBlobs,
+                beforeBlob: beforeBlobs[0] || null,
+                afterBlob: afterBlobs[0] || null
+              };
               delete cleanRec.beforeDataUrl;
               delete cleanRec.afterDataUrl;
+              delete cleanRec.beforeDataUrls;
+              delete cleanRec.afterDataUrls;
               await db.put('records', cleanRec);
             }
           }
 
           await loadAllProjects(data.project.id);
-          showToast(`已成功還原專案「${data.project.name}」（含底圖與紀錄影像）`);
+          showToast(`已成功還原專案「${data.project.name}」（含所有底圖與多張紀錄相片）`);
         } catch (err) {
           console.error(err);
           alert('匯入備份檔失敗：' + err.message);
@@ -3398,6 +4071,50 @@
         document.getElementById('projStatusInput').value = proj ? (proj.status || '進行中') : '進行中';
 
         modal.classList.remove('hidden');
+      }
+
+      function renderFpModalPreviewGrid() {
+        const grid = document.getElementById('fpImagesPreviewGrid');
+        const badge = document.getElementById('fpBatchCountBadge');
+        grid.innerHTML = '';
+        badge.textContent = `共 ${state.tempFpImages.length} 張圖面`;
+
+        if (state.tempFpImages.length === 0) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:12px;padding:12px;">尚未選取圖檔（可從上方一次複選多張圖片，或直接點擊儲存自動產生示範圖）</div>`;
+          return;
+        }
+
+        state.tempFpImages.forEach((im, idx) => {
+          const url = createManagedObjectUrl(im.blob);
+          const item = document.createElement('div');
+          item.className = 'modal-photo-item';
+          item.title = im.name || `圖面 #${idx + 1}`;
+          item.innerHTML = `
+            <img src="${url}" alt="${im.name || ''}" />
+            <button type="button" class="modal-photo-del" title="移除此張圖面">✕</button>
+          `;
+          item.querySelector('img').addEventListener('click', () => openLightbox(url, im.name || `圖面 #${idx + 1}`));
+          item.querySelector('.modal-photo-del').addEventListener('click', () => {
+            state.tempFpImages.splice(idx, 1);
+            renderFpModalPreviewGrid();
+          });
+          grid.appendChild(item);
+        });
+      }
+
+      function openFloorplanModal(editFp = null) {
+        state.editingFloorplanId = editFp ? editFp.id : null;
+        state.tempFpImages = editFp ? [...getFpImages(editFp)] : [];
+
+        document.getElementById('fpModalTitle').textContent = editFp
+          ? `管理／追加「${editFp.floor}」樓層 CAD 底圖`
+          : '匯入專案樓層 CAD 底圖（同樓層可收納多張）';
+
+        document.getElementById('fpFloorInput').value = editFp ? editFp.floor : `${state.floorplans.length + 1}F`;
+        document.getElementById('fpNameInput').value = editFp ? editFp.name : '';
+        document.getElementById('fpFileInput').value = '';
+        renderFpModalPreviewGrid();
+        document.getElementById('floorplanModal').classList.remove('hidden');
       }
 
       function nextIssueSerialCode() {
@@ -3421,7 +4138,7 @@
           progBox.classList.add('hidden');
           issBox.classList.remove('hidden');
           afterGroup.classList.remove('hidden');
-          lblBefore.textContent = '缺失改善前標註圖 (Before)';
+          lblBefore.textContent = '缺失改善前標註圖 (Before，可複選多張)';
           if (!document.getElementById('recIssueCodeInput').value) {
             document.getElementById('recIssueCodeInput').value = nextIssueSerialCode();
           }
@@ -3429,7 +4146,7 @@
           progBox.classList.remove('hidden');
           issBox.classList.add('hidden');
           afterGroup.classList.add('hidden');
-          lblBefore.textContent = '施工進度 CAD 疊圖成果';
+          lblBefore.textContent = '施工進度相片 / CAD 疊圖 (可複選或追加多張)';
         }
       }
 
@@ -3439,7 +4156,8 @@
         state.floorplans.forEach((fp) => {
           const opt = document.createElement('option');
           opt.value = fp.id;
-          opt.textContent = `[${fp.floor}] ${fp.name}`;
+          const cnt = getFpImages(fp).length;
+          opt.textContent = `[${fp.floor}] ${fp.name} (${cnt}張)`;
           if (fp.id === selectedFpId) opt.selected = true;
           sel.appendChild(opt);
         });
@@ -3477,14 +4195,54 @@
         });
       }
 
+      function renderRecordModalPhotoGrid(stage = 'before') {
+        const isAfter = stage === 'after';
+        const list = isAfter ? state.tempAfterBlobs : state.tempBeforeBlobs;
+        const grid = document.getElementById(isAfter ? 'afterPhotoPreviewGrid' : 'beforePhotoPreviewGrid');
+        const stateText = document.getElementById(isAfter ? 'afterPhotoStateText' : 'beforePhotoStateText');
+
+        grid.innerHTML = '';
+        stateText.textContent = `已綁定 ${list.length} 張相片`;
+
+        if (list.length === 0) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:11.5px;padding:10px;">尚未加入相片（可一次複選多張檔案）</div>`;
+          return;
+        }
+
+        list.forEach((blob, idx) => {
+          const url = createManagedObjectUrl(blob);
+          const item = document.createElement('div');
+          item.className = 'modal-photo-item';
+          item.innerHTML = `
+            <img src="${url}" alt="相片 #${idx + 1}" />
+            <button type="button" class="modal-photo-del" title="移除此張相片">✕</button>
+          `;
+          item.querySelector('img').addEventListener('click', () => openLightbox(url, `${isAfter ? '改善後' : '改善前/進度'}相片 #${idx + 1}`));
+          item.querySelector('.modal-photo-del').addEventListener('click', () => {
+            list.splice(idx, 1);
+            renderRecordModalPhotoGrid(stage);
+          });
+          grid.appendChild(item);
+        });
+      }
+
+      function syncRecordPhotosFromFloorplan(fpId) {
+        const fp = state.floorplans.find((f) => f.id === fpId);
+        if (fp) {
+          document.getElementById('recFloorInput').value = fp.floor;
+          state.tempBeforeBlobs = getFpImages(fp).map((im) => im.blob).filter(Boolean);
+        }
+        renderRecordModalPhotoGrid('before');
+      }
+
       function openRecordModal({ type = 'progress', date = '', floorplanId = '', floor = '', editRecord = null, focusAfterPhoto = false } = {}) {
         state.editingRecordId = editRecord ? editRecord.id : null;
-        state.tempBeforeBlob = editRecord ? editRecord.beforeBlob : null;
-        state.tempAfterBlob = editRecord ? editRecord.afterBlob : null;
+        state.tempBeforeBlobs = editRecord ? [...getRecordBlobs(editRecord, 'before')] : [];
+        state.tempAfterBlobs = editRecord ? [...getRecordBlobs(editRecord, 'after')] : [];
 
         document.getElementById('recordModalTitle').textContent = editRecord
-          ? (focusAfterPhoto ? `閉環複驗：補綁 ${editRecord.issueCode} 改善後照片` : '編輯工程紀錄')
-          : (type === 'issue' ? '新增問題／缺失紀錄' : '新增施工進度紀錄');
+          ? (focusAfterPhoto ? `閉環複驗：補綁 ${editRecord.issueCode} 改善後照片（可多張）` : '編輯工程紀錄與相片')
+          : (type === 'issue' ? '新增問題／缺失紀錄（可複選多張相片）' : '新增施工進度紀錄（可複選多張相片）');
 
         document.getElementById('recTypeSelect').value = editRecord ? editRecord.type : type;
         document.getElementById('recDateInput').value = editRecord ? editRecord.date : (date || state.selectedDate || todayISO());
@@ -3494,7 +4252,15 @@
           editRecord ? editRecord.floor : floor
         );
 
-        document.getElementById('recTradeSelect').value = editRecord ? (editRecord.trade || '水電工程') : '水電工程';
+        const activeFpId = document.getElementById('recFloorplanSelect').value;
+        if (activeFpId) {
+          const boundFp = state.floorplans.find((f) => f.id === activeFpId);
+          if (boundFp) {
+            state.tempBeforeBlobs = getFpImages(boundFp).map((im) => im.blob).filter(Boolean);
+          }
+        }
+
+        document.getElementById('recTradeSelect').value = editRecord ? (editRecord.trade || '基礎燈具安裝') : '基礎燈具安裝';
         document.getElementById('recSummaryInput').value = editRecord ? (editRecord.summary || '') : '';
         document.getElementById('recProgressStatusSelect').value = editRecord ? (editRecord.progressStatus || '施作中') : '施作中';
 
@@ -3509,9 +4275,8 @@
         document.getElementById('recBeforeFileInput').value = '';
         document.getElementById('recAfterFileInput').value = '';
 
-        document.getElementById('beforePhotoStateText').textContent = state.tempBeforeBlob ? '✔ 已綁定影像' : '未選擇圖片';
-        document.getElementById('afterPhotoStateText').textContent = state.tempAfterBlob ? '✔ 已綁定改善後影像' : '未綁定';
-
+        renderRecordModalPhotoGrid('before');
+        renderRecordModalPhotoGrid('after');
         renderQuickPhrasesInModal();
         syncRecordModalTypeUI();
 
@@ -3667,12 +4432,37 @@
           await seedDemoProject();
         });
 
-        // Floorplan Library Actions
+        // Floorplan Library Actions (Multiple Images Grouped within the Same Floorplan Card)
+        document.getElementById('fpFileInput').addEventListener('change', async (e) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length === 0) return;
+
+          showToast(`正在壓縮載入 ${files.length} 張底圖...`);
+          for (const f of files) {
+            const baseName = (f.name || '').replace(/\.[^/.]+$/, '').trim();
+            const res = await fileToCompressedBlob(f);
+            state.tempFpImages.push({
+              id: genId('fpimg'),
+              name: baseName || '平面圖',
+              blob: res.blob,
+              width: res.width,
+              height: res.height
+            });
+          }
+
+          if (!document.getElementById('fpNameInput').value.trim()) {
+            const floorVal = document.getElementById('fpFloorInput').value.trim() || '1F';
+            document.getElementById('fpNameInput').value = files.length === 1
+              ? (files[0].name.replace(/\.[^/.]+$/, '') || `${floorVal} 平面圖`)
+              : `${floorVal} 平面與系統套圖`;
+          }
+
+          e.target.value = '';
+          renderFpModalPreviewGrid();
+        });
+
         document.getElementById('btnUploadFloorplan').addEventListener('click', () => {
-          document.getElementById('fpFloorInput').value = `${state.floorplans.length + 1}F`;
-          document.getElementById('fpNameInput').value = '';
-          document.getElementById('fpFileInput').value = '';
-          document.getElementById('floorplanModal').classList.remove('hidden');
+          openFloorplanModal(null);
         });
         document.getElementById('btnCloseFpModal').addEventListener('click', () => document.getElementById('floorplanModal').classList.add('hidden'));
         document.getElementById('btnCancelFpModal').addEventListener('click', () => document.getElementById('floorplanModal').classList.add('hidden'));
@@ -3680,47 +4470,84 @@
         document.getElementById('btnSaveFpModal').addEventListener('click', async () => {
           const floor = document.getElementById('fpFloorInput').value.trim() || '1F';
           const name = document.getElementById('fpNameInput').value.trim() || `${floor} 平面圖`;
-          const file = document.getElementById('fpFileInput').files[0];
 
-          let imgRes;
-          if (file) {
-            imgRes = await fileToCompressedBlob(file);
-          } else {
-            imgRes = await createSyntheticCadBlob({ title: name, floor, mode: 'cad' });
+          // Check if an existing floorplan card for this floor already exists (when not editing a specific card)
+          let targetFp = state.editingFloorplanId
+            ? state.floorplans.find((f) => f.id === state.editingFloorplanId)
+            : state.floorplans.find((f) => (f.floor || '').toUpperCase() === floor.toUpperCase());
+
+          let finalImages = [...state.tempFpImages];
+          if (finalImages.length === 0) {
+            const imgRes = await createSyntheticCadBlob({ title: name, floor, mode: 'cad' });
+            finalImages.push({
+              id: genId('fpimg'),
+              name,
+              blob: imgRes.blob,
+              width: imgRes.width,
+              height: imgRes.height
+            });
           }
 
-          const fp = {
-            id: genId('fp'),
+          // If adding new images to an existing same-floor card (and user opened via "+匯入樓層 CAD 底圖"), merge images into that floor
+          if (!state.editingFloorplanId && targetFp) {
+            const existingImgs = getFpImages(targetFp);
+            finalImages = [...existingImgs, ...finalImages];
+          }
+
+          const fpRecord = {
+            id: targetFp ? targetFp.id : genId('fp'),
             projectId: state.currentProjectId,
             floor,
-            name,
-            imageBlob: imgRes.blob,
-            width: imgRes.width,
-            height: imgRes.height,
-            createdAt: Date.now()
+            name: (!state.editingFloorplanId && targetFp) ? targetFp.name : name,
+            images: finalImages,
+            imageBlob: finalImages[0]?.blob || null,
+            width: finalImages[0]?.width || 1200,
+            height: finalImages[0]?.height || 820,
+            createdAt: targetFp ? targetFp.createdAt : Date.now()
           };
-          await db.put('floorplans', fp);
+
+          await db.put('floorplans', fpRecord);
+
+          // Two-way sync: propagate updated floorplan photos & metadata to all bound records
+          const syncedBlobs = finalImages.map((im) => im.blob).filter(Boolean);
+          for (const rec of state.records) {
+            if (rec.floorplanId === fpRecord.id || (rec.floor || '').toUpperCase() === floor.toUpperCase()) {
+              rec.floorplanId = fpRecord.id;
+              rec.floorplanName = fpRecord.name;
+              rec.floor = fpRecord.floor;
+              rec.beforeBlobs = [...syncedBlobs];
+              rec.beforeBlob = syncedBlobs[0] || null;
+              await db.put('records', rec);
+            }
+          }
+
           document.getElementById('floorplanModal').classList.add('hidden');
           await loadProjectData(state.currentProjectId);
-          showToast(`已存入底圖「${name}」`);
+          showToast(`已儲存「${floor}」底圖群組並同步更新關聯紀錄（共 ${finalImages.length} 張圖面）`);
         });
 
         document.getElementById('btnAddDemoFloorplan').addEventListener('click', async () => {
           const floor = `${state.floorplans.length + 1}F`;
-          const name = `${floor} 標準水電空調配置圖`;
-          const imgRes = await createSyntheticCadBlob({ title: name, floor, mode: 'cad' });
+          const name = `${floor} 標準建築與機電套圖`;
+          const img1 = await createSyntheticCadBlob({ title: `${floor} 建築隔間平面圖`, floor, mode: 'cad' });
+          const img2 = await createSyntheticCadBlob({ title: `${floor} 水電空調配置圖`, floor, mode: 'cad' });
+          const imgs = [
+            { id: genId('fpimg'), name: `${floor} 建築隔間平面圖`, blob: img1.blob, width: img1.width, height: img1.height },
+            { id: genId('fpimg'), name: `${floor} 水電空調配置圖`, blob: img2.blob, width: img2.width, height: img2.height }
+          ];
           await db.put('floorplans', {
             id: genId('fp'),
             projectId: state.currentProjectId,
             floor,
             name,
-            imageBlob: imgRes.blob,
-            width: imgRes.width,
-            height: imgRes.height,
+            images: imgs,
+            imageBlob: imgs[0].blob,
+            width: imgs[0].width,
+            height: imgs[0].height,
             createdAt: Date.now()
           });
           await loadProjectData(state.currentProjectId);
-          showToast(`已產生示範底圖：${name}`);
+          showToast(`已產生示範樓層「${floor}」（內含 2 張 CAD 底圖）`);
         });
 
         // Quick Add Buttons
@@ -3755,31 +4582,38 @@
         });
         document.getElementById('filterKeyword').addEventListener('input', renderIssueBoardView);
 
-        // Record Modal Events
+        // Record Modal Events (Multi-Photo Selection & Append per Progress or Issue Record)
         document.getElementById('recTypeSelect').addEventListener('change', syncRecordModalTypeUI);
         document.getElementById('recFloorplanSelect').addEventListener('change', (e) => {
-          const fp = state.floorplans.find((f) => f.id === e.target.value);
-          if (fp) document.getElementById('recFloorInput').value = fp.floor;
+          syncRecordPhotosFromFloorplan(e.target.value);
         });
         document.getElementById('btnClearNote').addEventListener('click', () => {
           document.getElementById('recNoteInput').value = '';
         });
 
         document.getElementById('recBeforeFileInput').addEventListener('change', async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const res = await fileToCompressedBlob(file);
-          state.tempBeforeBlob = res.blob;
-          document.getElementById('beforePhotoStateText').textContent = `✔ 已壓縮載入 (${res.width}×${res.height})`;
+          const files = Array.from(e.target.files || []);
+          if (files.length === 0) return;
+          showToast(`正在壓縮並加入 ${files.length} 張相片...`);
+          for (const f of files) {
+            const res = await fileToCompressedBlob(f);
+            state.tempBeforeBlobs.push(res.blob);
+          }
+          e.target.value = '';
+          renderRecordModalPhotoGrid('before');
         });
 
         document.getElementById('recAfterFileInput').addEventListener('change', async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const res = await fileToCompressedBlob(file);
-          state.tempAfterBlob = res.blob;
+          const files = Array.from(e.target.files || []);
+          if (files.length === 0) return;
+          showToast(`正在壓縮並加入 ${files.length} 張改善後相片...`);
+          for (const f of files) {
+            const res = await fileToCompressedBlob(f);
+            state.tempAfterBlobs.push(res.blob);
+          }
           document.getElementById('recIssueStatusSelect').value = '已結案';
-          document.getElementById('afterPhotoStateText').textContent = `✔ 已載入改善後照片（自動轉已結案）`;
+          e.target.value = '';
+          renderRecordModalPhotoGrid('after');
         });
 
         document.getElementById('btnGenMockBefore').addEventListener('click', async () => {
@@ -3787,28 +4621,30 @@
           const floor = document.getElementById('recFloorInput').value.trim() || '1F';
           const code = document.getElementById('recIssueCodeInput').value.trim() || '#001';
           const summary = document.getElementById('recSummaryInput').value.trim() || '現場施作標註';
+          const nextNum = state.tempBeforeBlobs.length + 1;
           const res = await createSyntheticCadBlob({
-            title: `${floor} 施工標註底圖`,
+            title: `${floor} 施工標註底圖 #${nextNum}`,
             floor,
             mode: type === 'issue' ? 'issue' : 'progress',
-            badgeText: type === 'issue' ? `缺失 ${code}：改善前標註` : `${floor} ${summary}`
+            badgeText: type === 'issue' ? `缺失 ${code}：改善前標註 (${nextNum})` : `${floor} ${summary} (${nextNum})`
           });
-          state.tempBeforeBlob = res.blob;
-          document.getElementById('beforePhotoStateText').textContent = '✔ 已產生測試標註疊圖';
+          state.tempBeforeBlobs.push(res.blob);
+          renderRecordModalPhotoGrid('before');
         });
 
         document.getElementById('btnGenMockAfter').addEventListener('click', async () => {
           const floor = document.getElementById('recFloorInput').value.trim() || '1F';
           const code = document.getElementById('recIssueCodeInput').value.trim() || '#001';
+          const nextNum = state.tempAfterBlobs.length + 1;
           const res = await createSyntheticCadBlob({
-            title: `${floor} 複驗底圖`,
+            title: `${floor} 複驗底圖 #${nextNum}`,
             floor,
             mode: 'after',
-            badgeText: `缺失 ${code} 複驗：已改善結案`
+            badgeText: `缺失 ${code} 複驗：改善完成 (${nextNum})`
           });
-          state.tempAfterBlob = res.blob;
+          state.tempAfterBlobs.push(res.blob);
           document.getElementById('recIssueStatusSelect').value = '已結案';
-          document.getElementById('afterPhotoStateText').textContent = '✔ 已產生改善後對照圖（自動轉已結案）';
+          renderRecordModalPhotoGrid('after');
         });
 
         document.getElementById('btnCloseRecordModal').addEventListener('click', () => document.getElementById('recordModal').classList.add('hidden'));
@@ -3818,20 +4654,54 @@
           const type = document.getElementById('recTypeSelect').value;
           const date = document.getElementById('recDateInput').value || todayISO();
           const fpId = document.getElementById('recFloorplanSelect').value;
-          const fpObj = state.floorplans.find((f) => f.id === fpId);
+          let fpObj = state.floorplans.find((f) => f.id === fpId);
           const floor = document.getElementById('recFloorInput').value.trim() || (fpObj ? fpObj.floor : '1F');
+          if (!fpObj) {
+            fpObj = state.floorplans.find((f) => (f.floor || '').toUpperCase() === floor.toUpperCase()) || null;
+          }
           const trade = document.getElementById('recTradeSelect').value;
           const note = document.getElementById('recNoteInput').value.trim();
 
-          if (!state.tempBeforeBlob) {
-            const autoImg = await createSyntheticCadBlob({
-              title: fpObj ? fpObj.name : `${floor} 平面圖`,
-              floor,
-              mode: type === 'issue' ? 'issue' : 'progress',
-              badgeText: type === 'issue' ? `缺失 ${document.getElementById('recIssueCodeInput').value}` : (document.getElementById('recSummaryInput').value || '現場標註紀錄')
-            });
-            state.tempBeforeBlob = autoImg.blob;
+          if (state.tempBeforeBlobs.length === 0) {
+            if (fpObj && getFpImages(fpObj).length > 0) {
+              state.tempBeforeBlobs = getFpImages(fpObj).map((im) => im.blob).filter(Boolean);
+            } else {
+              const autoImg = await createSyntheticCadBlob({
+                title: fpObj ? fpObj.name : `${floor} 平面圖`,
+                floor,
+                mode: 'cad'
+              });
+              state.tempBeforeBlobs.push(autoImg.blob);
+            }
           }
+
+          // Two-way sync: write updated photos back to the bound Floorplan in IndexedDB (or create one if missing)
+          let syncedFpId = fpObj ? fpObj.id : genId('fp');
+          let syncedFpName = fpObj ? fpObj.name : `${floor} 平面圖`;
+          const prevFpImages = fpObj ? getFpImages(fpObj) : [];
+          const updatedFpImages = state.tempBeforeBlobs.map((blob, idx) => {
+            const matched = prevFpImages.find((im) => im.blob === blob);
+            return matched || {
+              id: genId('fpimg'),
+              name: `${syncedFpName}${state.tempBeforeBlobs.length > 1 ? ` (${idx + 1})` : ''}`,
+              blob,
+              width: 1200,
+              height: 820
+            };
+          });
+
+          const syncedFpRecord = {
+            id: syncedFpId,
+            projectId: state.currentProjectId,
+            floor,
+            name: syncedFpName,
+            images: updatedFpImages,
+            imageBlob: updatedFpImages[0]?.blob || null,
+            width: updatedFpImages[0]?.width || 1200,
+            height: updatedFpImages[0]?.height || 820,
+            createdAt: fpObj ? fpObj.createdAt : Date.now()
+          };
+          await db.put('floorplans', syncedFpRecord);
 
           const issueStatus = document.getElementById('recIssueStatusSelect').value;
           const rec = {
@@ -3840,8 +4710,8 @@
             type,
             date,
             floor,
-            floorplanId: fpId || '',
-            floorplanName: fpObj ? fpObj.name : `${floor} 平面圖`,
+            floorplanId: syncedFpId,
+            floorplanName: syncedFpName,
             trade,
             note,
             summary: type === 'progress' ? (document.getElementById('recSummaryInput').value.trim() || `${floor} ${trade}施作`) : '',
@@ -3851,16 +4721,33 @@
             severity: type === 'issue' ? document.getElementById('recSeveritySelect').value : '',
             issueStatus: type === 'issue' ? issueStatus : '',
             resolvedDate: type === 'issue' && issueStatus === '已結案' ? todayISO() : '',
-            beforeBlob: state.tempBeforeBlob,
-            afterBlob: type === 'issue' ? state.tempAfterBlob : null,
+            beforeBlobs: [...state.tempBeforeBlobs],
+            afterBlobs: type === 'issue' ? [...state.tempAfterBlobs] : [],
+            beforeBlob: state.tempBeforeBlobs[0] || null,
+            afterBlob: type === 'issue' ? (state.tempAfterBlobs[0] || null) : null,
             createdAt: Date.now()
           };
 
           await db.put('records', rec);
+
+          // Also sync any other existing records bound to this same floorplan so all cards remain 100% unified
+          for (const otherRec of state.records) {
+            if (otherRec.id !== rec.id && (otherRec.floorplanId === syncedFpId || (otherRec.floor || '').toUpperCase() === floor.toUpperCase())) {
+              otherRec.floorplanId = syncedFpId;
+              otherRec.floorplanName = syncedFpName;
+              otherRec.floor = floor;
+              otherRec.beforeBlobs = [...state.tempBeforeBlobs];
+              otherRec.beforeBlob = state.tempBeforeBlobs[0] || null;
+              await db.put('records', otherRec);
+            }
+          }
+
           state.selectedDate = date;
           document.getElementById('recordModal').classList.add('hidden');
           await loadProjectData(state.currentProjectId);
-          showToast(type === 'issue' ? `已儲存缺失紀錄 ${rec.issueCode}` : '已儲存施工進度紀錄');
+          showToast(type === 'issue'
+            ? `已儲存缺失紀錄 ${rec.issueCode} 並同步專案底圖庫（含 ${rec.beforeBlobs.length + rec.afterBlobs.length} 張相片）`
+            : `已儲存施工進度並同步專案底圖庫（含 ${rec.beforeBlobs.length} 張相片）`);
         });
 
         // Lightbox
@@ -3880,6 +4767,10 @@
         });
 
         document.getElementById('btnDownloadA4Html').addEventListener('click', exportStandaloneA4HtmlFile);
+
+        // Structured Folder Export (Method B: Desktop vs. Mobile)
+        document.getElementById('btnExportDesktopFolder').addEventListener('click', exportProjectToDesktopDirectory);
+        document.getElementById('btnExportMobileZip').addEventListener('click', exportProjectAsStructuredZip);
 
         // JSON Backup & Restore
         document.getElementById('btnExportJsonBackup').addEventListener('click', exportProjectJsonBackup);
