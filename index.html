@@ -380,46 +380,51 @@
       gap: 12px;
     }
 
-    /* Status Pills */
+    /* Status Pills (UX Option A-2 High-Contrast Solid & Tinted Badges) */
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 2px 8px;
+      padding: 2px 9px;
       border-radius: 999px;
       font-size: 11.5px;
-      font-weight: 700;
+      font-weight: 800;
       white-space: nowrap;
+      letter-spacing: 0.2px;
     }
 
     .badge-progress {
-      background: rgba(56, 189, 248, 0.16);
-      border: 1px solid rgba(56, 189, 248, 0.45);
-      color: #7dd3fc;
+      background: #0284c7;
+      border: 1px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     }
 
     .badge-issue-open {
-      background: rgba(239, 68, 68, 0.18);
-      border: 1px solid rgba(239, 68, 68, 0.55);
-      color: #fca5a5;
+      background: #e11d48;
+      border: 1px solid #fb7185;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     }
 
     .badge-issue-closed {
-      background: rgba(34, 197, 94, 0.18);
-      border: 1px solid rgba(34, 197, 94, 0.55);
-      color: #86efac;
+      background: #059669;
+      border: 1px solid #34d399;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     }
 
     .badge-urgent {
-      background: rgba(249, 115, 22, 0.22);
-      border: 1px solid rgba(249, 115, 22, 0.6);
-      color: #fdba74;
+      background: #ea580c;
+      border: 1px solid #fb923c;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     }
 
     .badge-neutral {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.62);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: #f1f5f9;
     }
 
     /* ==================== 4. View 1: Project Overview & CAD Floorplan Library ==================== */
@@ -523,16 +528,28 @@
     }
 
     .fp-actions {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 6px;
-      margin-top: 2px;
+      margin-top: 4px;
       width: 100%;
     }
 
     .fp-actions > button {
-      flex: 1 1 auto;
+      width: 100%;
       min-width: 0;
+      min-height: 30px;
+      padding: 5px 8px;
+      white-space: nowrap;
+      overflow: visible;
+      line-height: 1.2;
+      justify-content: center;
+    }
+
+    .fp-actions > button[data-act="use-fp"] {
+      grid-column: 1 / -1;
+      font-weight: 700;
+      padding: 6px 10px;
     }
 
     /* Multi-image Thumbnail Strip inside Floorplan Card & Modals */
@@ -772,7 +789,7 @@
       line-height: 1;
     }
 
-    /* Record Cards (Used in Daily Detail & Issue Board) */
+    /* Record Cards (Used in Daily Detail & Issue Board — UX Option A-2: Top Color Band + High-Contrast Text) */
     .record-list {
       display: flex;
       flex-direction: column;
@@ -787,18 +804,59 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+      transition: transform 0.12s ease, box-shadow 0.15s ease;
     }
 
-    .record-card.issue-open {
-      border-left: 4px solid var(--danger);
-    }
-
-    .record-card.issue-closed {
-      border-left: 4px solid var(--success);
-    }
-
+    /* 🔵 施工進度圖卡（UX A-2 頂部晴空色帶＋清透微光底） */
     .record-card.progress-item {
-      border-left: 4px solid var(--accent);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.25) 0%, rgba(56, 189, 248, 0.08) 46%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      border-left: 5px solid #38bdf8;
+    }
+
+    .record-card.progress-item .badge-neutral {
+      background: rgba(15, 23, 42, 0.55);
+      border-color: rgba(56, 189, 248, 0.5);
+      color: #e0f2fe;
+    }
+
+    .record-card.progress-item .record-meta-row {
+      color: #7dd3fc;
+    }
+
+    /* 🔴 缺失待處理圖卡（UX A-2 頂部珊瑚粉紅色帶＋清透微光底） */
+    .record-card.issue-open {
+      background: linear-gradient(180deg, rgba(251, 113, 133, 0.26) 0%, rgba(251, 113, 133, 0.08) 46%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(251, 113, 133, 0.6);
+      border-left: 5px solid #fb7185;
+    }
+
+    .record-card.issue-open .badge-neutral {
+      background: rgba(15, 23, 42, 0.55);
+      border-color: rgba(251, 113, 133, 0.5);
+      color: #ffe4e6;
+    }
+
+    .record-card.issue-open .record-meta-row {
+      color: #fda4af;
+    }
+
+    /* 🟢 缺失已結案圖卡（UX A-2 頂部薄荷翠綠色帶＋清透微光底） */
+    .record-card.issue-closed {
+      background: linear-gradient(180deg, rgba(52, 211, 153, 0.25) 0%, rgba(52, 211, 153, 0.08) 46%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.6);
+      border-left: 5px solid #34d399;
+    }
+
+    .record-card.issue-closed .badge-neutral {
+      background: rgba(15, 23, 42, 0.55);
+      border-color: rgba(52, 211, 153, 0.5);
+      color: #d1fae5;
+    }
+
+    .record-card.issue-closed .record-meta-row {
+      color: #6ee7b7;
     }
 
     .record-top {
@@ -818,16 +876,22 @@
 
     .record-title {
       font-size: 14.5px;
-      font-weight: 700;
-      color: #f8fafc;
+      font-weight: 800;
+      color: #ffffff;
       margin: 2px 0;
+      letter-spacing: 0.2px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
     }
 
     .record-note {
       font-size: 13px;
-      color: #cbd5e1;
-      line-height: 1.45;
+      color: #f8fafc;
+      line-height: 1.48;
       white-space: pre-wrap;
+      background: rgba(2, 6, 23, 0.38);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .record-meta-row {
@@ -837,9 +901,10 @@
       flex-wrap: wrap;
       gap: 8px;
       font-size: 12px;
+      font-weight: 600;
       color: var(--text-muted);
       padding-top: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .record-photos {
@@ -1535,16 +1600,24 @@
     }
 
     body.is-landscape .fp-actions {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 5px;
       overflow: visible;
     }
 
     body.is-landscape .fp-actions > button {
+      width: 100%;
       min-height: 27px;
-      padding: 4px 7px;
+      padding: 4px 6px;
       font-size: 11px;
+      white-space: nowrap;
+      justify-content: center;
+    }
+
+    body.is-landscape .fp-actions > button[data-act="use-fp"] {
+      grid-column: 1 / -1;
+      padding: 5px 8px;
     }
 
     /* View 2: Side-by-Side Calendar & Daily Detail on All Landscape Screens */
@@ -1827,7 +1900,6 @@
                 <span>專案基本資料</span>
               </h2>
               <div style="display:flex;gap:6px;">
-                <button id="btnSeedDemoData" class="btn-secondary btn-sm">載入示範工地資料</button>
                 <button id="btnDeleteProject" class="btn-danger btn-sm">刪除專案</button>
               </div>
             </div>
@@ -1861,7 +1933,6 @@
                 <span>專案專屬 CAD 底圖庫（免重複從相簿找圖）</span>
               </h2>
               <div style="display:flex;gap:6px;">
-                <button id="btnAddDemoFloorplan" class="btn-secondary btn-sm">＋產生示範 CAD 底圖</button>
                 <button id="btnUploadFloorplan" class="btn-primary btn-sm">＋匯入樓層 CAD 底圖</button>
               </div>
             </div>
@@ -1988,11 +2059,11 @@
                   <input type="date" id="rptEndDate" class="pm-input" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">包含內容模組</label>
+                  <label class="form-label">選擇輸出報告類型（預設：完整報告）</label>
                   <select id="rptContentScope" class="pm-select">
-                    <option value="both">施工進度 ＋ 問題缺失改善追蹤表</option>
-                    <option value="progress">僅顯示施工進度紀錄</option>
-                    <option value="issues">僅顯示問題／缺失改善追蹤表</option>
+                    <option value="both" selected>📄 完整報告（施工進度 ＋ 缺失改善追蹤）</option>
+                    <option value="progress">🔵 進度報告（僅輸出施工進度紀錄）</option>
+                    <option value="issues">🔴 缺失報告（僅輸出問題／缺失改善追蹤）</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -2269,7 +2340,6 @@
             <label class="form-label" id="lblBeforePhoto">標註疊圖成果 / 改善前照片 (可複選或分次追加多張)</label>
             <input type="file" id="recBeforeFileInput" accept="image/*" multiple class="pm-input" />
             <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
-              <button type="button" id="btnGenMockBefore" class="btn-secondary btn-sm">⚡ ＋追加測試標註圖</button>
               <span id="beforePhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">共 0 張相片</span>
             </div>
             <div id="beforePhotoPreviewGrid" class="modal-photo-grid"></div>
@@ -2279,7 +2349,6 @@
             <label class="form-label">複驗改善後對照圖 (After，可複選或追加多張)</label>
             <input type="file" id="recAfterFileInput" accept="image/*" multiple class="pm-input" />
             <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
-              <button type="button" id="btnGenMockAfter" class="btn-secondary btn-sm">⚡ ＋追加測試改善後圖</button>
               <span id="afterPhotoStateText" style="font-size:11.5px;color:var(--text-muted);align-self:center;">共 0 張相片</span>
             </div>
             <div id="afterPhotoPreviewGrid" class="modal-photo-grid"></div>
@@ -2475,104 +2544,6 @@
         return await res.blob();
       }
 
-      // Generate synthetic CAD floorplan or annotated overlay image for offline demo & testing
-      function createSyntheticCadBlob({ title = '1F 平面配置圖', floor = '1F', mode = 'cad', badgeText = '' }) {
-        return new Promise((resolve) => {
-          const w = 1200;
-          const h = 820;
-          const c = document.createElement('canvas');
-          c.width = w;
-          c.height = h;
-          const g = c.getContext('2d');
-
-          g.fillStyle = '#f8fafc';
-          g.fillRect(0, 0, w, h);
-
-          // Grid
-          g.strokeStyle = '#e2e8f0';
-          g.lineWidth = 1;
-          for (let x = 0; x <= w; x += 40) {
-            g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
-          }
-          for (let y = 0; y <= h; y += 40) {
-            g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
-          }
-
-          // Outer & Inner walls
-          g.strokeStyle = '#1e293b';
-          g.lineWidth = 8;
-          g.strokeRect(90, 90, w - 180, h - 180);
-
-          g.lineWidth = 5;
-          g.beginPath();
-          g.moveTo(520, 90); g.lineTo(520, 460);
-          g.moveTo(820, 90); g.lineTo(820, 730);
-          g.moveTo(90, 460); g.lineTo(820, 460);
-          g.stroke();
-
-          // Room Labels
-          g.fillStyle = '#334155';
-          g.font = 'bold 24px "Microsoft JhengHei", sans-serif';
-          g.fillText(`${floor} 主辦公區 / 客廳`, 140, 150);
-          g.fillText(`${floor} 機電茶水間`, 560, 150);
-          g.fillText(`${floor} 走道與設備區`, 140, 520);
-          g.fillText(`${floor} 主管室`, 860, 150);
-
-          // Title Block
-          g.fillStyle = '#0f172a';
-          g.fillRect(90, h - 140, w - 180, 50);
-          g.fillStyle = '#ffffff';
-          g.font = 'bold 20px "Microsoft JhengHei", sans-serif';
-          g.fillText(`圖名：${title} (${floor})`, 115, h - 108);
-
-          // If Progress or Issue overlay mode, draw simulated cropped site photo & red/green callout
-          if (mode !== 'cad') {
-            const isAfter = mode === 'after';
-            const boxColor = isAfter ? '#16a34a' : (mode === 'issue' ? '#dc2626' : '#0284c7');
-
-            // Simulated overlaid site photo card
-            g.fillStyle = '#1e293b';
-            g.fillRect(620, 250, 380, 260);
-            g.strokeStyle = boxColor;
-            g.lineWidth = 6;
-            g.strokeRect(620, 250, 380, 260);
-
-            // Simulated ceiling piping inside photo
-            g.strokeStyle = isAfter ? '#4ade80' : '#facc15';
-            g.lineWidth = 4;
-            g.beginPath();
-            g.moveTo(650, 330); g.lineTo(960, 330);
-            g.moveTo(780, 270); g.lineTo(780, 480);
-            g.stroke();
-
-            g.fillStyle = '#f8fafc';
-            g.font = 'bold 20px "Microsoft JhengHei", sans-serif';
-            g.fillText(isAfter ? '【現場複驗改善完成照片】' : '【現場局部裁切疊圖照片】', 645, 470);
-
-            // Callout circle & arrow to CAD location
-            g.strokeStyle = boxColor;
-            g.lineWidth = 5;
-            g.beginPath();
-            g.arc(380, 310, 48, 0, Math.PI * 2);
-            g.stroke();
-
-            g.beginPath();
-            g.moveTo(620, 360);
-            g.lineTo(428, 315);
-            g.stroke();
-
-            // Tag banner
-            g.fillStyle = boxColor;
-            g.fillRect(140, 210, 420, 44);
-            g.fillStyle = '#ffffff';
-            g.font = 'bold 21px "Microsoft JhengHei", sans-serif';
-            g.fillText(badgeText || (isAfter ? '複驗結果：已改善結案' : '現場標註紀錄'), 155, 239);
-          }
-
-          c.toBlob((blob) => resolve({ blob, width: w, height: h }), 'image/jpeg', 0.85);
-        });
-      }
-
       /* ==================== 3. Application State & Multi-Photo Helpers ==================== */
       const state = {
         activeView: 'viewOverview',
@@ -2759,13 +2730,32 @@
         return DEFAULT_PHRASES;
       }
 
-      /* ==================== 4. Database Loading & Demo Seeding ==================== */
+      /* ==================== 4. Database Loading ==================== */
       async function loadAllProjects(preferredId = null) {
         state.projects = await db.getAll('projects');
+
+        // Clean up any legacy auto-seeded demo project ("竹北高鐵特區 A 棟商業空間裝修工程") if present
+        const legacyDemos = state.projects.filter((p) => p.name === '竹北高鐵特區 A 棟商業空間裝修工程');
+        if (legacyDemos.length > 0) {
+          for (const dp of legacyDemos) {
+            const fps = await db.getByIndex('floorplans', 'projectId', dp.id);
+            for (const f of fps) await db.delete('floorplans', f.id);
+            const recs = await db.getByIndex('records', 'projectId', dp.id);
+            for (const r of recs) await db.delete('records', r.id);
+            await db.delete('projects', dp.id);
+          }
+          state.projects = await db.getAll('projects');
+        }
+
         state.projects.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
         if (state.projects.length === 0) {
-          await seedDemoProject();
+          state.currentProjectId = null;
+          state.floorplans = [];
+          state.records = [];
+          localStorage.removeItem(ACTIVE_PROJECT_KEY);
+          renderAll();
+          openProjectModal(false);
           return;
         }
 
@@ -2821,150 +2811,6 @@
         renderAll();
       }
 
-      async function seedDemoProject() {
-        const projId = genId('proj');
-        const today = todayISO();
-        const d1 = today.slice(0, 8) + '05';
-        const d2 = today.slice(0, 8) + '12';
-        const d3 = today.slice(0, 8) + '18';
-
-        const demoProject = {
-          id: projId,
-          name: '竹北高鐵特區 A 棟商業空間裝修工程',
-          location: '新竹縣竹北市復興三路 168 號 1F-2F',
-          startDate: today.slice(0, 8) + '01',
-          endDate: today.slice(0, 8) + '28',
-          status: '進行中',
-          createdAt: Date.now()
-        };
-        await db.put('projects', demoProject);
-
-        const fp1Img = await createSyntheticCadBlob({ title: '1F 建築隔間與水電平面圖', floor: '1F', mode: 'cad' });
-        const fp2Img = await createSyntheticCadBlob({ title: '2F 空調風管與照明配置圖', floor: '2F', mode: 'cad' });
-
-        const fp1 = {
-          id: genId('fp'),
-          projectId: projId,
-          floor: '1F',
-          name: '1F 建築隔間與水電平面圖',
-          images: [{ id: genId('fpimg'), name: '1F 建築隔間與水電平面圖', blob: fp1Img.blob, width: fp1Img.width, height: fp1Img.height }],
-          imageBlob: fp1Img.blob,
-          width: fp1Img.width,
-          height: fp1Img.height,
-          createdAt: Date.now() - 30000
-        };
-        const fp2 = {
-          id: genId('fp'),
-          projectId: projId,
-          floor: '2F',
-          name: '2F 空調風管與照明配置圖',
-          images: [{ id: genId('fpimg'), name: '2F 空調風管與照明配置圖', blob: fp2Img.blob, width: fp2Img.width, height: fp2Img.height }],
-          imageBlob: fp2Img.blob,
-          width: fp2Img.width,
-          height: fp2Img.height,
-          createdAt: Date.now() - 20000
-        };
-        await db.put('floorplans', fp1);
-        await db.put('floorplans', fp2);
-
-        const issue1After = await createSyntheticCadBlob({
-          title: fp1.name,
-          floor: '1F',
-          mode: 'after',
-          badgeText: '缺失 #001 複驗：已重新調整吊架坡度並試水合格'
-        });
-
-        const demoRecords = [
-          {
-            id: genId('rec'),
-            projectId: projId,
-            type: 'progress',
-            date: d1,
-            floor: '1F',
-            floorplanId: fp1.id,
-            floorplanName: fp1.name,
-            trade: '基礎燈具安裝',
-            summary: '1F 主配電箱安裝與基礎燈具迴路架設',
-            progressStatus: '階段完成',
-            note: '1F 配電箱 弱電箱 迴路標示核對完成，已完工。',
-            beforeBlobs: [fp1Img.blob],
-            beforeBlob: fp1Img.blob,
-            afterBlobs: [],
-            afterBlob: null,
-            createdAt: Date.now() - 15000
-          },
-          {
-            id: genId('rec'),
-            projectId: projId,
-            type: 'issue',
-            date: d2,
-            floor: '1F',
-            floorplanId: fp1.id,
-            floorplanName: fp1.name,
-            trade: '水電工程',
-            issueCode: '#001',
-            issueStatus: '已結案',
-            severity: '一般',
-            assignee: '宏達水電工班',
-            note: '1F 茶水間排水管坡度平緩恐積水，已請工班重新調整吊筋高度，複驗試水順暢已完工。',
-            beforeBlobs: [fp1Img.blob],
-            beforeBlob: fp1Img.blob,
-            afterBlobs: [issue1After.blob],
-            afterBlob: issue1After.blob,
-            resolvedDate: d3,
-            createdAt: Date.now() - 10000
-          },
-          {
-            id: genId('rec'),
-            projectId: projId,
-            type: 'progress',
-            date: today,
-            floor: '2F',
-            floorplanId: fp2.id,
-            floorplanName: fp2.name,
-            trade: '進口燈具安裝',
-            summary: '2F 辦公區暗架天花板與進口燈具定位施作',
-            progressStatus: '施作中',
-            note: '2F LED 軟條燈 嵌燈 開孔位置確認中。',
-            beforeBlobs: [fp2Img.blob],
-            beforeBlob: fp2Img.blob,
-            afterBlobs: [],
-            afterBlob: null,
-            createdAt: Date.now() - 5000
-          },
-          {
-            id: genId('rec'),
-            projectId: projId,
-            type: 'issue',
-            date: today,
-            floor: '2F',
-            floorplanId: fp2.id,
-            floorplanName: fp2.name,
-            trade: '空調工程',
-            issueCode: '#002',
-            issueStatus: '待處理',
-            severity: '緊急',
-            assignee: '大成空調工程行',
-            note: '2F 出風口 位置偏移，與木作造型天花燈槽衝突，待修繕。',
-            beforeBlobs: [fp2Img.blob],
-            beforeBlob: fp2Img.blob,
-            afterBlobs: [],
-            afterBlob: null,
-            createdAt: Date.now() - 2000
-          }
-        ];
-
-        for (const r of demoRecords) {
-          await db.put('records', r);
-        }
-
-        state.currentProjectId = projId;
-        localStorage.setItem(ACTIVE_PROJECT_KEY, projId);
-        state.projects = await db.getAll('projects');
-        await loadProjectData(projId);
-        showToast('已載入示範專案、CAD 底圖與施工/缺失紀錄');
-      }
-
       /* ==================== 5. Rendering All Views ==================== */
       function renderAll() {
         renderProjectSelectorAndKPI();
@@ -2977,6 +2823,22 @@
       function renderProjectSelectorAndKPI() {
         const sel = document.getElementById('projectSelect');
         sel.innerHTML = '';
+        if (state.projects.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = '-- 尚未建立工程專案 --';
+          sel.appendChild(opt);
+          document.getElementById('kpiProjectStatus').textContent = '尚未建立';
+          document.getElementById('kpiProjectPeriod').textContent = '--';
+          document.getElementById('kpiFloorplanCount').textContent = '0 樓層 (0)';
+          document.getElementById('kpiProgressCount').textContent = '0';
+          document.getElementById('kpiProgressCompleted').textContent = '階段完成 0 筆 / 施作中 0 筆';
+          document.getElementById('kpiIssueRate').textContent = '100%';
+          document.getElementById('kpiIssueRate').style.color = '#4ade80';
+          document.getElementById('kpiIssueSummary').textContent = '已結案 0 / 總計 0（待處理 0）';
+          document.getElementById('navOpenIssueBadge').classList.add('hidden');
+          return;
+        }
         state.projects.forEach((p) => {
           const opt = document.createElement('option');
           opt.value = p.id;
@@ -3016,14 +2878,21 @@
 
       function renderOverviewAndFloorplans() {
         const proj = getCurrentProject();
-        if (!proj) return;
+        const grid = document.getElementById('floorplanGrid');
+        if (!proj) {
+          document.getElementById('infoProjName').textContent = '--（請點擊上方「＋新專案」建立專案）';
+          document.getElementById('infoProjLocation').textContent = '--';
+          document.getElementById('infoProjDates').textContent = '--';
+          document.getElementById('infoProjStatus').textContent = '--';
+          if (grid) grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">請先建立工程專案，再匯入樓層 CAD 底圖。</div>`;
+          return;
+        }
 
         document.getElementById('infoProjName').textContent = proj.name || '--';
         document.getElementById('infoProjLocation').textContent = proj.location || '--';
         document.getElementById('infoProjDates').textContent = `${proj.startDate || '--'} 至 ${proj.endDate || '--'}`;
         document.getElementById('infoProjStatus').textContent = proj.status || '進行中';
 
-        const grid = document.getElementById('floorplanGrid');
         grid.innerHTML = '';
 
         if (state.floorplans.length === 0) {
@@ -3063,7 +2932,7 @@
               ${miniStripHtml}
               <div class="fp-meta"><span class="fp-active-label">${imgUrls[0]?.name || fp.name}</span> ｜ 關聯紀錄 ${relatedCount} 筆</div>
               <div class="fp-actions">
-                <button class="btn-primary btn-sm" style="flex:1;" data-act="use-fp" data-id="${fp.id}">＋此樓層紀錄</button>
+                <button class="btn-primary btn-sm" data-act="use-fp" data-id="${fp.id}">＋此樓層紀錄</button>
                 <button class="btn-secondary btn-sm" data-act="edit-fp" data-id="${fp.id}" title="管理或追加此樓層的多張底圖">＋圖(${imgUrls.length})</button>
                 <button class="btn-secondary btn-sm" data-act="open-cad" data-id="${fp.id}" title="載入此底圖至 CAD 畫布">畫布</button>
                 <button class="btn-danger btn-sm" data-act="del-fp" data-id="${fp.id}" title="刪除此樓層底圖群組">✕</button>
@@ -3426,13 +3295,26 @@
         const closedIssues = data.allIssuesInRange.filter((r) => r.issueStatus === '已結案').length;
         const rateStr = totalIssues === 0 ? '100% (0/0)' : `${Math.round((closedIssues / totalIssues) * 100)}% (已結案 ${closedIssues} / 總計 ${totalIssues})`;
 
+        const reportTypeTitle = data.scope === 'progress'
+          ? '施工進度報告'
+          : (data.scope === 'issues' ? '問題／缺失改善追蹤報告' : '施工進度與缺失改善完整報告');
+
+        const summaryMetricRow1Label = data.scope === 'issues' ? '當期缺失總筆數' : '當期總進度筆數';
+        const summaryMetricRow1Val = data.scope === 'issues' ? `${totalIssues} 筆` : `${data.progressList.length} 筆`;
+        const summaryMetricRow2Label = data.scope === 'progress' ? '階段完成／施作中' : '當期缺失結案率';
+        const progDoneCnt = data.progressList.filter((r) => r.progressStatus === '階段完成').length;
+        const summaryMetricRow2Val = data.scope === 'progress'
+          ? `階段完成 ${progDoneCnt} 筆 ／ 施作中 ${data.progressList.length - progDoneCnt} 筆`
+          : rateStr;
+
         let html = `
           <header class="rpt-header">
             <div>
-              <h1 class="rpt-title">${proj.name || '工程專案'} — 施工進度與缺失改善追蹤報告</h1>
+              <h1 class="rpt-title">${proj.name || '工程專案'} — ${reportTypeTitle}</h1>
               <p class="rpt-subtitle">業主 / 案場地址：${proj.location || '--'} ｜ 專案狀態：${proj.status || '進行中'}</p>
             </div>
             <div style="text-align:right;font-size:12px;color:#334155;">
+              <div><strong>報告類型：</strong>${reportTypeTitle}</div>
               <div><strong>報告區間：</strong>${data.start} 至 ${data.end}</div>
               <div><strong>製表日期：</strong>${todayISO()}</div>
             </div>
@@ -3442,21 +3324,22 @@
             <tr>
               <th>專案名稱</th>
               <td>${proj.name || '--'}</td>
-              <th>當期總進度筆數</th>
-              <td><strong>${data.progressList.length} 筆</strong></td>
+              <th>${summaryMetricRow1Label}</th>
+              <td><strong>${summaryMetricRow1Val}</strong></td>
             </tr>
             <tr>
               <th>預計工期</th>
               <td>${proj.startDate || '--'} ~ ${proj.endDate || '--'}</td>
-              <th>當期缺失結案率</th>
-              <td><strong>${rateStr}</strong></td>
+              <th>${summaryMetricRow2Label}</th>
+              <td><strong>${summaryMetricRow2Val}</strong></td>
             </tr>
           </table>
         `;
 
         // Section 1: Construction Progress (Supports Multiple Photos per Progress Item)
         if (data.scope === 'both' || data.scope === 'progress') {
-          html += `<h2 class="rpt-section-title">壹、施工進度紀錄區（依日期與樓層排序）</h2>`;
+          const sec1Prefix = data.scope === 'both' ? '壹、' : '';
+          html += `<h2 class="rpt-section-title">${sec1Prefix}施工進度紀錄區（依日期與樓層排序）</h2>`;
           if (data.progressList.length === 0) {
             html += `<div class="rpt-card" style="color:#64748b;text-align:center;">所選日期區間內無施工進度紀錄</div>`;
           } else {
@@ -3494,7 +3377,8 @@
 
         // Section 2: Issue / Punch List Tracking (Supports Multiple Before/After Photos)
         if (data.scope === 'both' || data.scope === 'issues') {
-          html += `<h2 class="rpt-section-title">貳、問題／缺失改善追蹤表（改善前 vs. 改善後對照）</h2>`;
+          const sec2Prefix = data.scope === 'both' ? '貳、' : '';
+          html += `<h2 class="rpt-section-title">${sec2Prefix}問題／缺失改善追蹤表（改善前 vs. 改善後對照）</h2>`;
           if (data.filteredIssues.length === 0) {
             html += `<div class="rpt-card" style="color:#64748b;text-align:center;">所選日期區間與篩選條件內無問題缺失紀錄</div>`;
           } else {
@@ -3674,14 +3558,17 @@
         if (!proj) return;
         showToast('正在封裝 A4 HTML 報告（內嵌高解析圖片）...');
         const { data, html } = await generateStandaloneA4HtmlString();
+        const typeSuffix = data.scope === 'progress'
+          ? 'A4施工進度報告'
+          : (data.scope === 'issues' ? 'A4缺失改善報告' : 'A4完整工程報告');
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${proj.name}_A4工程報告_${data.start}_${data.end}.html`;
+        a.download = `${proj.name}_${typeSuffix}_${data.start}_${data.end}.html`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast('已下載獨立可列印 A4 HTML 報告檔');
+        showToast(`已下載獨立可列印 ${typeSuffix} (.html)`);
       }
 
       /* ==================== 9.5 Structured Project Folder Export (Method B: Desktop Directory vs. Mobile ZIP/Share) ==================== */
@@ -4080,7 +3967,7 @@
         badge.textContent = `共 ${state.tempFpImages.length} 張圖面`;
 
         if (state.tempFpImages.length === 0) {
-          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:12px;padding:12px;">尚未選取圖檔（可從上方一次複選多張圖片，或直接點擊儲存自動產生示範圖）</div>`;
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:12px;padding:12px;">尚未選取圖檔（請從上方選擇一張或多張樓層 CAD 底圖）</div>`;
           return;
         }
 
@@ -4428,10 +4315,6 @@
           showToast('已刪除專案');
         });
 
-        document.getElementById('btnSeedDemoData').addEventListener('click', async () => {
-          await seedDemoProject();
-        });
-
         // Floorplan Library Actions (Multiple Images Grouped within the Same Floorplan Card)
         document.getElementById('fpFileInput').addEventListener('change', async (e) => {
           const files = Array.from(e.target.files || []);
@@ -4462,6 +4345,10 @@
         });
 
         document.getElementById('btnUploadFloorplan').addEventListener('click', () => {
+          if (!getCurrentProject()) {
+            openProjectModal(false);
+            return;
+          }
           openFloorplanModal(null);
         });
         document.getElementById('btnCloseFpModal').addEventListener('click', () => document.getElementById('floorplanModal').classList.add('hidden'));
@@ -4477,15 +4364,9 @@
             : state.floorplans.find((f) => (f.floor || '').toUpperCase() === floor.toUpperCase());
 
           let finalImages = [...state.tempFpImages];
-          if (finalImages.length === 0) {
-            const imgRes = await createSyntheticCadBlob({ title: name, floor, mode: 'cad' });
-            finalImages.push({
-              id: genId('fpimg'),
-              name,
-              blob: imgRes.blob,
-              width: imgRes.width,
-              height: imgRes.height
-            });
+          if (finalImages.length === 0 && (!targetFp || state.editingFloorplanId)) {
+            alert('請先選擇至少一張 CAD 底圖圖檔');
+            return;
           }
 
           // If adding new images to an existing same-floor card (and user opened via "+匯入樓層 CAD 底圖"), merge images into that floor
@@ -4524,30 +4405,6 @@
           document.getElementById('floorplanModal').classList.add('hidden');
           await loadProjectData(state.currentProjectId);
           showToast(`已儲存「${floor}」底圖群組並同步更新關聯紀錄（共 ${finalImages.length} 張圖面）`);
-        });
-
-        document.getElementById('btnAddDemoFloorplan').addEventListener('click', async () => {
-          const floor = `${state.floorplans.length + 1}F`;
-          const name = `${floor} 標準建築與機電套圖`;
-          const img1 = await createSyntheticCadBlob({ title: `${floor} 建築隔間平面圖`, floor, mode: 'cad' });
-          const img2 = await createSyntheticCadBlob({ title: `${floor} 水電空調配置圖`, floor, mode: 'cad' });
-          const imgs = [
-            { id: genId('fpimg'), name: `${floor} 建築隔間平面圖`, blob: img1.blob, width: img1.width, height: img1.height },
-            { id: genId('fpimg'), name: `${floor} 水電空調配置圖`, blob: img2.blob, width: img2.width, height: img2.height }
-          ];
-          await db.put('floorplans', {
-            id: genId('fp'),
-            projectId: state.currentProjectId,
-            floor,
-            name,
-            images: imgs,
-            imageBlob: imgs[0].blob,
-            width: imgs[0].width,
-            height: imgs[0].height,
-            createdAt: Date.now()
-          });
-          await loadProjectData(state.currentProjectId);
-          showToast(`已產生示範樓層「${floor}」（內含 2 張 CAD 底圖）`);
         });
 
         // Quick Add Buttons
@@ -4616,41 +4473,15 @@
           renderRecordModalPhotoGrid('after');
         });
 
-        document.getElementById('btnGenMockBefore').addEventListener('click', async () => {
-          const type = document.getElementById('recTypeSelect').value;
-          const floor = document.getElementById('recFloorInput').value.trim() || '1F';
-          const code = document.getElementById('recIssueCodeInput').value.trim() || '#001';
-          const summary = document.getElementById('recSummaryInput').value.trim() || '現場施作標註';
-          const nextNum = state.tempBeforeBlobs.length + 1;
-          const res = await createSyntheticCadBlob({
-            title: `${floor} 施工標註底圖 #${nextNum}`,
-            floor,
-            mode: type === 'issue' ? 'issue' : 'progress',
-            badgeText: type === 'issue' ? `缺失 ${code}：改善前標註 (${nextNum})` : `${floor} ${summary} (${nextNum})`
-          });
-          state.tempBeforeBlobs.push(res.blob);
-          renderRecordModalPhotoGrid('before');
-        });
-
-        document.getElementById('btnGenMockAfter').addEventListener('click', async () => {
-          const floor = document.getElementById('recFloorInput').value.trim() || '1F';
-          const code = document.getElementById('recIssueCodeInput').value.trim() || '#001';
-          const nextNum = state.tempAfterBlobs.length + 1;
-          const res = await createSyntheticCadBlob({
-            title: `${floor} 複驗底圖 #${nextNum}`,
-            floor,
-            mode: 'after',
-            badgeText: `缺失 ${code} 複驗：改善完成 (${nextNum})`
-          });
-          state.tempAfterBlobs.push(res.blob);
-          document.getElementById('recIssueStatusSelect').value = '已結案';
-          renderRecordModalPhotoGrid('after');
-        });
-
         document.getElementById('btnCloseRecordModal').addEventListener('click', () => document.getElementById('recordModal').classList.add('hidden'));
         document.getElementById('btnCancelRecordModal').addEventListener('click', () => document.getElementById('recordModal').classList.add('hidden'));
 
         document.getElementById('btnSaveRecordModal').addEventListener('click', async () => {
+          if (!getCurrentProject()) {
+            document.getElementById('recordModal').classList.add('hidden');
+            openProjectModal(false);
+            return;
+          }
           const type = document.getElementById('recTypeSelect').value;
           const date = document.getElementById('recDateInput').value || todayISO();
           const fpId = document.getElementById('recFloorplanSelect').value;
@@ -4662,46 +4493,40 @@
           const trade = document.getElementById('recTradeSelect').value;
           const note = document.getElementById('recNoteInput').value.trim();
 
-          if (state.tempBeforeBlobs.length === 0) {
-            if (fpObj && getFpImages(fpObj).length > 0) {
-              state.tempBeforeBlobs = getFpImages(fpObj).map((im) => im.blob).filter(Boolean);
-            } else {
-              const autoImg = await createSyntheticCadBlob({
-                title: fpObj ? fpObj.name : `${floor} 平面圖`,
-                floor,
-                mode: 'cad'
-              });
-              state.tempBeforeBlobs.push(autoImg.blob);
-            }
+          if (state.tempBeforeBlobs.length === 0 && fpObj && getFpImages(fpObj).length > 0) {
+            state.tempBeforeBlobs = getFpImages(fpObj).map((im) => im.blob).filter(Boolean);
           }
 
-          // Two-way sync: write updated photos back to the bound Floorplan in IndexedDB (or create one if missing)
-          let syncedFpId = fpObj ? fpObj.id : genId('fp');
+          // Two-way sync: write updated photos back to the bound Floorplan in IndexedDB (when photos or an existing floorplan exist)
+          let syncedFpId = fpObj ? fpObj.id : (state.tempBeforeBlobs.length > 0 ? genId('fp') : '');
           let syncedFpName = fpObj ? fpObj.name : `${floor} 平面圖`;
-          const prevFpImages = fpObj ? getFpImages(fpObj) : [];
-          const updatedFpImages = state.tempBeforeBlobs.map((blob, idx) => {
-            const matched = prevFpImages.find((im) => im.blob === blob);
-            return matched || {
-              id: genId('fpimg'),
-              name: `${syncedFpName}${state.tempBeforeBlobs.length > 1 ? ` (${idx + 1})` : ''}`,
-              blob,
-              width: 1200,
-              height: 820
-            };
-          });
 
-          const syncedFpRecord = {
-            id: syncedFpId,
-            projectId: state.currentProjectId,
-            floor,
-            name: syncedFpName,
-            images: updatedFpImages,
-            imageBlob: updatedFpImages[0]?.blob || null,
-            width: updatedFpImages[0]?.width || 1200,
-            height: updatedFpImages[0]?.height || 820,
-            createdAt: fpObj ? fpObj.createdAt : Date.now()
-          };
-          await db.put('floorplans', syncedFpRecord);
+          if (syncedFpId) {
+            const prevFpImages = fpObj ? getFpImages(fpObj) : [];
+            const updatedFpImages = state.tempBeforeBlobs.map((blob, idx) => {
+              const matched = prevFpImages.find((im) => im.blob === blob);
+              return matched || {
+                id: genId('fpimg'),
+                name: `${syncedFpName}${state.tempBeforeBlobs.length > 1 ? ` (${idx + 1})` : ''}`,
+                blob,
+                width: 1200,
+                height: 820
+              };
+            });
+
+            const syncedFpRecord = {
+              id: syncedFpId,
+              projectId: state.currentProjectId,
+              floor,
+              name: syncedFpName,
+              images: updatedFpImages,
+              imageBlob: updatedFpImages[0]?.blob || null,
+              width: updatedFpImages[0]?.width || 1200,
+              height: updatedFpImages[0]?.height || 820,
+              createdAt: fpObj ? fpObj.createdAt : Date.now()
+            };
+            await db.put('floorplans', syncedFpRecord);
+          }
 
           const issueStatus = document.getElementById('recIssueStatusSelect').value;
           const rec = {
