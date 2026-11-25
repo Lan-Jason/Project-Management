@@ -4054,12 +4054,10 @@
           floorInput.value = selectedFloor;
         } else if (selectedFpId) {
           const fp = state.floorplans.find((f) => f.id === selectedFpId);
-          if (fp) floorInput.value = fp.floor;
-        } else if (state.floorplans[0]) {
-          sel.value = state.floorplans[0].id;
-          floorInput.value = state.floorplans[0].floor;
+          floorInput.value = fp ? fp.floor : '';
         } else {
-          floorInput.value = '1F';
+          sel.value = '';
+          floorInput.value = '';
         }
       }
 
@@ -4114,16 +4112,24 @@
       }
 
       function syncRecordPhotosFromFloorplan(fpId) {
+        if (!fpId) {
+          state.tempBeforeBlobs = [];
+          renderRecordModalPhotoGrid('before');
+          return;
+        }
         const fp = state.floorplans.find((f) => f.id === fpId);
         if (fp) {
           document.getElementById('recFloorInput').value = fp.floor;
           state.tempBeforeBlobs = getFpImages(fp).map((im) => im.blob).filter(Boolean);
+        } else {
+          state.tempBeforeBlobs = [];
         }
         renderRecordModalPhotoGrid('before');
       }
 
       function openRecordModal({ type = 'progress', date = '', floorplanId = '', floor = '', editRecord = null, focusAfterPhoto = false } = {}) {
         state.editingRecordId = editRecord ? editRecord.id : null;
+        // Default photo lists are empty when adding a new record (Method B); only load photos when editing an existing record or when user selects a floorplan
         state.tempBeforeBlobs = editRecord ? [...getRecordBlobs(editRecord, 'before')] : [];
         state.tempAfterBlobs = editRecord ? [...getRecordBlobs(editRecord, 'after')] : [];
 
@@ -4138,14 +4144,6 @@
           editRecord ? editRecord.floorplanId : floorplanId,
           editRecord ? editRecord.floor : floor
         );
-
-        const activeFpId = document.getElementById('recFloorplanSelect').value;
-        if (activeFpId) {
-          const boundFp = state.floorplans.find((f) => f.id === activeFpId);
-          if (boundFp) {
-            state.tempBeforeBlobs = getFpImages(boundFp).map((im) => im.blob).filter(Boolean);
-          }
-        }
 
         document.getElementById('recTradeSelect').value = editRecord ? (editRecord.trade || '基礎燈具安裝') : '基礎燈具安裝';
         document.getElementById('recSummaryInput').value = editRecord ? (editRecord.summary || '') : '';
@@ -4493,36 +4491,61 @@
           const trade = document.getElementById('recTradeSelect').value;
           const note = document.getElementById('recNoteInput').value.trim();
 
-          if (state.tempBeforeBlobs.length === 0 && fpObj && getFpImages(fpObj).length > 0) {
-            state.tempBeforeBlobs = getFpImages(fpObj).map((im) => im.blob).filter(Boolean);
+          // Method 1 (Append/Merge Sync):
+          // - When adding a new record: merge any newly uploaded photos in state.tempBeforeBlobs with the floorplan's existing images (never wipe existing floorplan photos if user saved with 0 photos).
+          // - When editing an existing record: reflect the user's edited photo list (additions/removals) back to the floorplan.
+          const isEditingExistingRecord = Boolean(state.editingRecordId);
+          const prevFpImages = fpObj ? getFpImages(fpObj) : [];
+          let finalFpImages = [];
+
+          if (!isEditingExistingRecord) {
+            // New record: keep existing floorplan images and append any newly uploaded photos that aren't already in prevFpImages
+            finalFpImages = [...prevFpImages];
+            state.tempBeforeBlobs.forEach((blob, idx) => {
+              if (!finalFpImages.some((im) => im.blob === blob)) {
+                const baseTitle = fpObj ? fpObj.name : `${floor} 平面圖`;
+                finalFpImages.push({
+                  id: genId('fpimg'),
+                  name: `${baseTitle} (${finalFpImages.length + 1})`,
+                  blob,
+                  width: 1200,
+                  height: 820
+                });
+              }
+            });
+          } else {
+            // Editing an existing record: sync the modified photo list
+            if (state.tempBeforeBlobs.length === 0 && prevFpImages.length > 0) {
+              finalFpImages = [];
+            } else {
+              const baseTitle = fpObj ? fpObj.name : `${floor} 平面圖`;
+              finalFpImages = state.tempBeforeBlobs.map((blob, idx) => {
+                const matched = prevFpImages.find((im) => im.blob === blob);
+                return matched || {
+                  id: genId('fpimg'),
+                  name: `${baseTitle}${state.tempBeforeBlobs.length > 1 ? ` (${idx + 1})` : ''}`,
+                  blob,
+                  width: 1200,
+                  height: 820
+                };
+              });
+            }
           }
 
-          // Two-way sync: write updated photos back to the bound Floorplan in IndexedDB (when photos or an existing floorplan exist)
-          let syncedFpId = fpObj ? fpObj.id : (state.tempBeforeBlobs.length > 0 ? genId('fp') : '');
+          const finalSyncedBlobs = finalFpImages.map((im) => im.blob).filter(Boolean);
+          let syncedFpId = fpObj ? fpObj.id : (finalFpImages.length > 0 ? genId('fp') : '');
           let syncedFpName = fpObj ? fpObj.name : `${floor} 平面圖`;
 
           if (syncedFpId) {
-            const prevFpImages = fpObj ? getFpImages(fpObj) : [];
-            const updatedFpImages = state.tempBeforeBlobs.map((blob, idx) => {
-              const matched = prevFpImages.find((im) => im.blob === blob);
-              return matched || {
-                id: genId('fpimg'),
-                name: `${syncedFpName}${state.tempBeforeBlobs.length > 1 ? ` (${idx + 1})` : ''}`,
-                blob,
-                width: 1200,
-                height: 820
-              };
-            });
-
             const syncedFpRecord = {
               id: syncedFpId,
               projectId: state.currentProjectId,
               floor,
               name: syncedFpName,
-              images: updatedFpImages,
-              imageBlob: updatedFpImages[0]?.blob || null,
-              width: updatedFpImages[0]?.width || 1200,
-              height: updatedFpImages[0]?.height || 820,
+              images: finalFpImages,
+              imageBlob: finalFpImages[0]?.blob || null,
+              width: finalFpImages[0]?.width || 1200,
+              height: finalFpImages[0]?.height || 820,
               createdAt: fpObj ? fpObj.createdAt : Date.now()
             };
             await db.put('floorplans', syncedFpRecord);
@@ -4546,9 +4569,9 @@
             severity: type === 'issue' ? document.getElementById('recSeveritySelect').value : '',
             issueStatus: type === 'issue' ? issueStatus : '',
             resolvedDate: type === 'issue' && issueStatus === '已結案' ? todayISO() : '',
-            beforeBlobs: [...state.tempBeforeBlobs],
+            beforeBlobs: [...finalSyncedBlobs],
             afterBlobs: type === 'issue' ? [...state.tempAfterBlobs] : [],
-            beforeBlob: state.tempBeforeBlobs[0] || null,
+            beforeBlob: finalSyncedBlobs[0] || null,
             afterBlob: type === 'issue' ? (state.tempAfterBlobs[0] || null) : null,
             createdAt: Date.now()
           };
@@ -4561,8 +4584,8 @@
               otherRec.floorplanId = syncedFpId;
               otherRec.floorplanName = syncedFpName;
               otherRec.floor = floor;
-              otherRec.beforeBlobs = [...state.tempBeforeBlobs];
-              otherRec.beforeBlob = state.tempBeforeBlobs[0] || null;
+              otherRec.beforeBlobs = [...finalSyncedBlobs];
+              otherRec.beforeBlob = finalSyncedBlobs[0] || null;
               await db.put('records', otherRec);
             }
           }
